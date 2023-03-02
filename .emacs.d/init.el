@@ -1,21 +1,77 @@
 (server-start)
-    (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-    (setq custom-file "~/.emacs.d/custom.el")
-    (require 'package)
+(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+(setq custom-file "~/.emacs.d/custom.el")
+(require 'package)
 
-    (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                             ("elpa" . "https://elpa.gnu.org/packages/")))
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("elpa" . "https://elpa.gnu.org/packages/")
+                         ("melpa-stable" . "https://stable.melpa.org/packages/")))
 
-    (package-initialize)
-    (unless package-archive-contents
-      (package-refresh-contents))
+(package-initialize)
+(unless package-archive-contents
+  (package-refresh-contents))
 
-    ;; Initialize use-package
-    (unless (package-installed-p 'use-package)
-      (package-install 'use-package))
+;; Initialize use-package
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
 
-    (require 'use-package)
-    (setq use-package-always-ensure t)
+(require 'use-package)
+(setq use-package-always-ensure t)
+
+(defvar jas/default-font-size 180)
+  (defvar jas/default-variable-font-size 180)
+  (defvar jas/default-fixed-font "Hack")
+  (defvar jas/default-variable-font "Cantarell")
+  (setq inhibit-startup-message t)
+  (blink-cursor-mode -1)
+  (show-paren-mode -1)
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1)
+  (tooltip-mode -1)
+  (menu-bar-mode -1)
+  (set-fringe-mode 10)
+  (use-package which-key
+    :config
+    (which-key-mode 1)
+    (setq which-key-idle-delay 1))
+  (set-face-attribute 'default nil :font jas/default-fixed-font :height jas/default-font-size)
+  (set-face-attribute 'fixed-pitch nil :font jas/default-fixed-font :height jas/default-font-size)
+  (set-face-attribute 'variable-pitch nil :font jas/default-variable-font :height jas/default-variable-font-size :weight 'regular)
+  (use-package general
+    :config (general-evil-setup t))
+  (general-create-definer jas/leader-def
+    ;; :prefix my-leader
+    :prefix "SPC")
+(general-define-key
+  "C-=" 'text-scale-increase
+   "C--" 'text-scale-decrease) 
+(general-define-key
+:keymaps 'read-passwd-map
+  "C-v" 'evil-paste-after)
+  (jas/leader-def
+    :states 'normal
+    "." 'find-file
+    "," 'consult-buffer
+    "fp" (lambda () (interactive) (find-file user-emacs-directory))
+    "hi" 'info
+    "bn" 'switch-to-next-buffer
+    "bv" 'switch-to-prev-buffer
+    "oa" 'org-agenda
+    "hf" 'helpful-callable
+    "hv" 'helpful-variable)
+  (use-package openwith
+    :config
+    (openwith-mode 1))
+  (setq openwith-associations
+        (list
+         (list (openwith-make-extension-regexp
+                '("pdf"))
+               "zathura"
+               '(file))))
+  (use-package undo-tree)
+ (global-undo-tree-mode)
+ (customize-set-variable 'evil-undo-system 'undo-tree)
+ (setq evil-want-fine-undo t)
 
 (use-package diminish)
   (use-package all-the-icons)
@@ -24,7 +80,7 @@
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
           doom-themes-enable-italic t)) ; if nil, italics is universally disabled
-    (load-theme 'doom-one t)
+    (load-theme 'doom-snazzy t)
     (use-package evil
       :init
       (setq evil-want-keybinding nil)
@@ -51,7 +107,7 @@
     (use-package evil-escape
       :init
       (setq-default evil-escape-key-sequence "jk")
-      (setq-default evil-escape-delay 0.2)
+      (setq-default evil-escape-delay 0.1)
       :config
       (evil-escape-mode 1))
     (setq org-src-tab-acts-natively t)
@@ -60,54 +116,6 @@
     (setq-default evil-shift-width tab-width)
     (require 'org-tempo)
     (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-
-(defvar jas/default-font-size 180)
- (defvar jas/default-variable-font-size 180)
- (defvar jas/default-fixed-font "AnonymousPro")
- (defvar jas/default-variable-font "Signika")
- (setq inhibit-startup-message t)
- (blink-cursor-mode -1)
- (show-paren-mode -1)
- (scroll-bar-mode -1)
- (tool-bar-mode -1)
- (tooltip-mode -1)
- (menu-bar-mode -1)
- (set-fringe-mode 10)
- (use-package which-key
-   :config
-   (which-key-mode 1)
-   (setq which-key-idle-delay 1))
- (set-face-attribute 'default nil :font jas/default-fixed-font :height jas/default-font-size)
- (set-face-attribute 'fixed-pitch nil :font jas/default-fixed-font :height jas/default-font-size)
- (set-face-attribute 'variable-pitch nil :font jas/default-variable-font :height jas/default-variable-font-size :weight 'regular)
- (use-package general
-   :config (general-evil-setup t))
- (general-create-definer jas/leader-def
-   ;; :prefix my-leader
-   :prefix "SPC")
- (jas/leader-def
-   :states 'normal
-   "." 'find-file
-   "," 'consult-buffer
-   "fp" (lambda () (interactive) (find-file user-emacs-directory))
-   "bn" 'switch-to-next-buffer
-   "bv" 'switch-to-prev-buffer
-   "oa" 'org-agenda
-   "hf" 'helpful-callable
-   "hv" 'helpful-variable)
- (use-package openwith
-   :config
-   (openwith-mode 1))
- (setq openwith-associations
-       (list
-        (list (openwith-make-extension-regexp
-               '("pdf"))
-              "zathura"
-              '(file))))
- (use-package undo-tree)
-(global-undo-tree-mode)
-(customize-set-variable 'evil-undo-system 'undo-tree)
-(setq evil-want-fine-undo t)
 
 (setq initial-scratch-message "")
 (line-number-mode 0)
@@ -119,9 +127,22 @@
 (setq doom-modeline-height 10)
 (setq doom-modeline-buffer-encoding nil)
 
+(use-package ivy)
 (use-package vertico
   :init
   (vertico-mode))
+(use-package vertico-directory
+  :after vertico
+  :ensure nil
+  ;; More convenient directory navigation commands
+  :bind (:map vertico-map
+              ("RET" . vertico-directory-enter)
+              ("DEL" . vertico-directory-delete-char)
+              ("M-DEL" . vertico-directory-delete-word)
+              ("C-k" . previous-line-or-history-element)
+               ("C-j" . next-line-or-history-element))
+  ;; Tidy shadowed file names
+  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 (use-package consult)
 (use-package marginalia
   :init (marginalia-mode))
@@ -132,52 +153,44 @@
   (completion-styles '(orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
-(use-package company
-    :bind (:map company-active-map
-           ("<tab>" . company-complete-selection))
-    :custom
-    (company-minimum-prefix-length 3)
-    (company-idle-delay 0.5))
-  (use-package company-box
-    :hook (company-mode . company-box-mode))
-    (setq company-box-icons-unknown 'fa_question_circle)
-(setq company-box-scrollbar nil)
-
-(setq org-cycle-separator-lines 0)
 (add-hook 'org-mode-hook (lambda() (display-line-numbers-mode 0)))
-(use-package org-superstar)
-(setq org-ellipsis " ▼"
-      org-superstar-remove-leading-stars t
-      org-hide-emphasis-markers t
-      org-superstar-headline-bullets-list '("◉" "●" "○" "◆" "●" "○" "◆")
-      org-superstar-item-bullet-alist '((?+ . ?◆) (?- . ?•))
-      org-superstar-special-todo-items 'hide)
-(add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
-(add-hook 'org-mode-hook 'org-indent-mode)
-(add-hook 'org-mode-hook 'variable-pitch-mode)
-(add-hook 'org-mode-hook 'visual-line-mode)
-(set-face-attribute 'org-document-title nil :font jas/default-fixed-font :weight 'bold :height 1.3)
-(dolist (face '((org-level-1 . 2.0)
-                (org-level-2 . 2.0)
-                (org-level-3 . 1.5)
-                (org-level-4 . 1.2)
-                (org-level-5 . 1.1)
-                (org-level-6 . 1.1)
-                (org-level-7 . 1.1)
-                (org-level-8 . 1.1)))
-  (set-face-attribute (car face) nil :font jas/default-variable-font :weight 'medium :height (cdr face)))
-
-(set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
-(set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
-(set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-(set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
-(set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
-(set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-(set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-(set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-(set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
-(set-face-attribute 'line-number nil :inherit 'fixed-pitch)
-(set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+  (add-hook 'org-mode-hook 'org-indent-mode)
+    (add-hook 'org-mode-hook 'visual-line-mode)
+  (use-package org-bullets)
+  (setq org-ellipsis " ▼"
+        org-superstar-remove-leading-stars t
+        org-hide-emphasis-markers t)
+  (jas/leader-def
+:states 'normal
+:keymaps 'org-mode-map
+ "mx" 'org-toggle-checkbox
+ "mp" 'org-priority
+ "mt" 'org-time-stamp)
+  ;;  (add-hook 'org-mode-hook 'variable-pitch-mode)
+  ;;  (add-hook 'org-mode-hook 'visual-line-mode)
+  ;;  (set-face-attribute 'org-document-title nil :font jas/default-fixed-font :weight 'bold :height 1.3)
+  ;;  (dolist (face '((org-level-1 . 2.0)
+  ;;                  (org-level-2 . 2.0)
+  ;;                  (org-level-3 . 1.5)
+  ;;                  (org-level-4 . 1.2)
+  ;;                  (org-level-5 . 1.1)
+  ;;                  (org-level-6 . 1.1)
+  ;;                  (org-level-7 . 1.1)
+  ;;                  (org-level-8 . 1.1)))
+  ;;    (set-face-attribute (car face) nil :font jas/default-variable-font :weight 'medium :height (cdr face)))
+  ;;
+  ;;  (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+  ;;  (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
+  ;;  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+  ;;  (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
+  ;;  (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
+  ;;  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  ;;  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  ;;  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  ;;  (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
+  ;;  (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
+  ;;  (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
 
 (use-package evil-org
   :after org
@@ -250,6 +263,7 @@
             (push '("\\mathbb{F}" . ?𝔽) prettify-symbols-alist)
             ))
 
+(add-hook 'LaTeX-mode-hool 'electric-pair-mode)
 (use-package yasnippet)
 (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
 (use-package yasnippet-snippets)
@@ -260,32 +274,27 @@
   :hook ((LaTeX-mode . laas-mode))
   :config ; do whatever here
   (aas-set-snippets 'laas-mode
+      "mk" (lambda () (interactive)
+                  (yas-expand-snippet "$$0$"))
+      "nk" (lambda () (interactive)
+                  (yas-expand-snippet "\\[$0\\]"))
     ;; set condition!
     :cond #'texmathp ; expand only while in math
-    "supp" "\\supp"
-    "On" "O(n)"
-    "O1" "O(1)"
-    "Olog" "O(\\log n)"
-    "Olon" "O(n \\log n)"
-    ;; bind to functions!
-    "Sum" (lambda () (interactive)
-            (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
-    "Span" (lambda () (interactive)
+    "spn" (lambda () (interactive)
              (yas-expand-snippet "\\Span($1)$0"))
     ;; add accent snippets
     :cond #'laas-object-on-left-condition
     "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
 
+(use-package lsp-mode
+:hook  (lsp-mode . lsp-enable-which-key-integration))
+(use-package lsp-ui)
+(add-hook 'LaTeX-mode-hook 'lsp-mode)
+
 (use-package denote)
 (setq denote-directory "~/projects/notes")
 
-(setq denote-templates '((daily . "* Journal\n\n* Tasks\n** TODO [/]\n1. [ ] Mindfulness(10min)\n2. [ ] Journaling(5min)\n3. [ ] Check Out\n** Notes")
-                         (math-note . "\input{~/projects/writing/templates/preamble.tex}")
-                         ))
-(defun math-note ()
-  "Create a new latex note with denote"
-  (interactive)
-  (denote-type))
+(setq denote-templates '((daily . "* Journal\n\n* Tasks\n** TODO [/]\n1. [ ] Mindfulness(10min)\n2. [ ] Journaling(5min)\n3. [ ] Check Out\n** Notes") (math-landing-page . "* meta-analysis\n* Source")))
 
 (defun daily-journal ()
   "Create an entry tagged 'journal' with the date as its title."
@@ -297,6 +306,17 @@
    (concat denote-directory "/daily")
    nil
    'daily)) ; multiple keywords are a list of strings: '("one" "two")
+
+(use-package with-editor)
+(add-hook 'shell-mode-hook  'with-editor-export-editor)
+
+(setq x-select-enable-clipboard t)
+(use-package magit) 
+(setq evil-move-cursor-back nil) 
+(setq evil-esc-delay 0)
+
+(add-to-list 'load-path "~/latex-notes") 
+(require 'latex-notes)
 
 (use-package citar
       :custom
