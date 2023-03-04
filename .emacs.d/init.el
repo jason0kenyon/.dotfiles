@@ -273,7 +273,6 @@
   (general-define-key
  :keymaps 'org-mode-map
 "C-<return>" 'org-meta-return
-"C-<return>" 'org-insert-todo-heading
 )
 
 (setq TeX-auto-save t)
@@ -375,3 +374,7 @@
         (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . "🖋️")
         (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . "🔗")))
 (setq citar-symbol-separator "  ")
+
+(use-package vterm)
+(add-hook 'vterm-mode-hook (lambda() (display-line-numbers-mode 0)))
+(add-hook 'eshell-mode-hook (lambda() (display-line-numbers-mode 0)))
