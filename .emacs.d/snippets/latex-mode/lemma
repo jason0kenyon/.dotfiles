@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: lemma
+# key: lem
+# --
+\begin{lemma}
+$0
+\end{lemma}
+
+

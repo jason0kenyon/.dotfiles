@@ -21,7 +21,7 @@
 (defvar jas/default-font-size 180)
   (defvar jas/default-variable-font-size 180)
   (defvar jas/default-fixed-font "Hack")
-  (defvar jas/default-variable-font "Cantarell")
+  (defvar jas/default-variable-font "Signika")
   (setq inhibit-startup-message t)
   (blink-cursor-mode -1)
   (show-paren-mode -1)
@@ -167,30 +167,30 @@
  "mx" 'org-toggle-checkbox
  "mp" 'org-priority
  "mt" 'org-time-stamp)
-  ;;  (add-hook 'org-mode-hook 'variable-pitch-mode)
-  ;;  (add-hook 'org-mode-hook 'visual-line-mode)
-  ;;  (set-face-attribute 'org-document-title nil :font jas/default-fixed-font :weight 'bold :height 1.3)
-  ;;  (dolist (face '((org-level-1 . 2.0)
-  ;;                  (org-level-2 . 2.0)
-  ;;                  (org-level-3 . 1.5)
-  ;;                  (org-level-4 . 1.2)
-  ;;                  (org-level-5 . 1.1)
-  ;;                  (org-level-6 . 1.1)
-  ;;                  (org-level-7 . 1.1)
-  ;;                  (org-level-8 . 1.1)))
-  ;;    (set-face-attribute (car face) nil :font jas/default-variable-font :weight 'medium :height (cdr face)))
-  ;;
-  ;;  (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
-  ;;  (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
-  ;;  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-  ;;  (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
-  ;;  (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
-  ;;  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-  ;;  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  ;;  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  ;;  (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
-  ;;  (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
-  ;;  (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
+    (add-hook 'org-mode-hook 'variable-pitch-mode)
+    (add-hook 'org-mode-hook 'visual-line-mode)
+    (set-face-attribute 'org-document-title nil :font jas/default-fixed-font :weight 'bold :height 1.3)
+    (dolist (face '((org-level-1 . 2.0)
+                    (org-level-2 . 2.0)
+                    (org-level-3 . 1.5)
+                    (org-level-4 . 1.2)
+                    (org-level-5 . 1.1)
+                    (org-level-6 . 1.1)
+                    (org-level-7 . 1.1)
+                    (org-level-8 . 1.1)))
+      (set-face-attribute (car face) nil :font jas/default-variable-font :weight 'medium :height (cdr face)))
+
+    (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+    (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
+    (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+    (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+    (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+    (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
+    (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
+    (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
 
 (use-package evil-org
   :after org
@@ -247,49 +247,58 @@
                    ((org-agenda-overriding-header "On Hold:")))))))
 
 (setq TeX-auto-save t)
-(setq TeX-parse-self t)
-(setq-default TeX-master nil)
-(use-package tex-mode
-  :ensure auctex)
-(add-hook 'TeX-mode-hook 'LaTeX-math-mode)
-(add-hook 'TeX-mode-hook 'visual-line-mode)
-(add-hook 'TeX-mode-hook 'reftex-mode)
-(add-hook 'org-mode-hook 'org-toggle-pretty-entities)
-(add-hook 'TeX-mode-hook (lambda () (and (TeX-fold-mode 1) (TeX-fold-buffer))))
-(add-hook 'TeX-mode-hook 'prettify-symbols-mode)
-(add-hook 'TeX-mode-hook
-          (lambda ()
-            (push '("\\mathbb{C}" . ?ℂ) prettify-symbols-alist)
-            (push '("\\mathbb{F}" . ?𝔽) prettify-symbols-alist)
-            ))
+  (setq TeX-parse-self t)
+  (setq-default TeX-master nil)
+  (use-package tex-mode
+    :ensure auctex)
+  (add-hook 'TeX-mode-hook 'LaTeX-math-mode)
+  (add-hook 'TeX-mode-hook 'visual-line-mode)
+  (add-hook 'TeX-mode-hook 'reftex-mode)
+  (add-hook 'org-mode-hook 'org-toggle-pretty-entities)
+  (add-hook 'TeX-mode-hook (lambda () (and (TeX-fold-mode 1) (TeX-fold-buffer))))
+  (add-hook 'TeX-mode-hook 'prettify-symbols-mode)
+  (add-hook 'TeX-mode-hook
+            (lambda ()
+              (push '("\\mathbb{C}" . ?ℂ) prettify-symbols-alist)
+              (push '("\\mathbb{F}" . ?𝔽) prettify-symbols-alist)
+              ))
+  (use-package mixed-pitch
+:hook (LaTeX-mode . mixed-pitch-mode))
 
 (add-hook 'LaTeX-mode-hool 'electric-pair-mode)
-(use-package yasnippet)
-(setq yas-snippet-dirs '("~/.emacs.d/snippets"))
-(use-package yasnippet-snippets)
-(use-package aas
-  :hook (LaTeX-mode . aas-activate-for-major-mode))
-(yas-global-mode 1)
-(use-package laas
-  :hook ((LaTeX-mode . laas-mode))
-  :config ; do whatever here
-  (aas-set-snippets 'laas-mode
-      "mk" (lambda () (interactive)
-                  (yas-expand-snippet "$$0$"))
-      "nk" (lambda () (interactive)
-                  (yas-expand-snippet "\\[$0\\]"))
-    ;; set condition!
-    :cond #'texmathp ; expand only while in math
-    "spn" (lambda () (interactive)
-             (yas-expand-snippet "\\Span($1)$0"))
-    ;; add accent snippets
-    :cond #'laas-object-on-left-condition
-    "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
+  (use-package yasnippet)
+  (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+  (use-package yasnippet-snippets)
+  (use-package aas
+    :hook (LaTeX-mode . aas-activate-for-major-mode))
+  (yas-global-mode 1)
+  (use-package laas :hook ((LaTeX-mode . laas-mode))
+    :config ; do whatever here
+    (aas-set-snippets 'laas-mode
+        "mk" (lambda () (interactive)
+                    (yas-expand-snippet "$$0$"))
+        "\[" (lambda () (interactive)
+                    (yas-expand-snippet "\\[$0\\]"))
+
+      ;; set condition!
+      :cond #'texmathp ; expand only while in math
+      "spn" (lambda () (interactive)
+               (yas-expand-snippet "\\Span($1)$0"))
+        "int" (lambda () (interactive)
+                    (yas-expand-snippet "\\int"))
+        "sum" (lambda () (interactive)
+                    (yas-expand-snippet "\\sum_{$1}^{$2}$0"))
+      ;; add accent snippets
+      :cond #'laas-object-on-left-condition
+      "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
+
+(setq TeX-electric-sub-and-superscript t)
 
 (use-package lsp-mode
 :hook  (lsp-mode . lsp-enable-which-key-integration))
 (use-package lsp-ui)
 (add-hook 'LaTeX-mode-hook 'lsp-mode)
+(add-hook 'LaTeX-mode-hook 'electric-pair-mode)
 
 (use-package denote)
 (setq denote-directory "~/projects/notes")
@@ -385,10 +394,10 @@
           ([?\s-v] . evil-window-split)
           ([?\s-p] . exwm-workspace-switch)
           ([?\s-w] . evil-window-delete)
-          ([?\s-J] . +evil/window-move-down)
-          ([?\s-K] . +evil/window-move-up)
-          ([?\s-H] . +evil/window-move-left)
-          ([?\s-L] . +evil/window-move-right)
+          ([?\s-J] . evil-window-exchange)
+          ([?\s-K] . evil-window-exchange)
+          ([?\s-H] . evil-window-exchange)
+          ([?\s-L] . evil-window-exchange)
 
 
           ;; Switch workspace
@@ -460,3 +469,10 @@
 ;; When EXWM starts up, do some extra confifuration
 (add-hook 'exwm-init-hook #'jas/exwm-init-hook)
 (exwm-enable)
+
+(use-package vterm)
+
+(use-package obsidian
+  :config
+  (obsidian-specify-path "~/projects/obsidian")
+  (global-obsidian-mode t))

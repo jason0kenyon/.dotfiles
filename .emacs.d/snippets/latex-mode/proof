@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: proof 
+# key: pf
+# --
+\begin{custom-proof}
+$0
+\end{custom-proof}
