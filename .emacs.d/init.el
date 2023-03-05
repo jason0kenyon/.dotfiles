@@ -63,7 +63,7 @@
              '(file))))
 
 (use-package undo-tree
-  :diminish)
+:diminish)
 (global-undo-tree-mode)
 (use-package evil
   :init
@@ -86,13 +86,12 @@
   :config
   (evil-escape-mode 1))
 (use-package evil-collection
-  :diminish
   :after evil
   :config
   (evil-collection-init))
 
 (use-package which-key
-  :diminish
+  :diminish 
   :config
   (which-key-mode 1)
   (setq which-key-idle-delay 1))
@@ -112,6 +111,7 @@
   "." 'find-file
   "," 'consult-buffer
   "fp" (lambda () (interactive) (find-file (expand-file-name "init.org" user-emacs-directory)))
+  "fr" 'consult-recent-file
   "hi" 'info
   "bn" 'switch-to-next-buffer
   "bv" 'switch-to-prev-buffer
@@ -162,46 +162,49 @@
 (with-eval-after-load 'org-indent
   (diminish 'org-indent-mode))
 
-(use-package savehist
-  :init
-  (savehist-mode))
-  (use-package vertico
+(recentf-mode 1)
+  (use-package savehist
     :init
-    (vertico-mode))
-  (use-package vertico-directory
-    :after vertico
-    :ensure nil
-    ;; More convenient directory navigation commands
-    :bind (:map vertico-map
-                ("RET" . vertico-directory-enter)
-                ("DEL" . vertico-directory-delete-char)
-                ("M-DEL" . vertico-directory-delete-word)
-                ("C-k" . previous-line-or-history-element)
-                 ("C-j" . next-line-or-history-element))
-    ;; Tidy shadowed file names
-    :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
-  (use-package consult)
-  (use-package marginalia
-    :init (marginalia-mode))
-  (use-package embark)
-  (use-package embark-consult)
-  (use-package orderless
-    :custom
-    (completion-styles '(orderless basic))
-    (completion-category-overrides '((file (styles basic partial-completion)))))
+    (savehist-mode))
+    (use-package vertico
+      :init
+      (vertico-mode))
+    (use-package vertico-directory
+      :after vertico
+      :ensure nil
+      ;; More convenient directory navigation commands
+      :bind (:map vertico-map
+                  ("RET" . vertico-directory-enter)
+                  ("DEL" . vertico-directory-delete-char)
+                  ("M-DEL" . vertico-directory-delete-word)
+                  ("C-k" . previous-line-or-history-element)
+                   ("C-j" . next-line-or-history-element))
+      ;; Tidy shadowed file names
+      :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+    (use-package consult)
+    (use-package marginalia
+      :init (marginalia-mode))
+    (use-package embark)
+    (use-package embark-consult)
+    (use-package orderless
+      :custom
+      (completion-styles '(orderless basic))
+      (completion-category-overrides '((file (styles basic partial-completion)))))
+(use-package consult-flycheck)
 
 (setq org-src-tab-acts-natively t)
-(setq org-src-fontify-natively t)
-(require 'org-tempo)
-(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-(add-hook 'org-mode-hook (lambda() (display-line-numbers-mode 0)))
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-(add-hook 'org-mode-hook 'org-indent-mode)
-(add-hook 'org-mode-hook 'visual-line-mode)
-(use-package org-bullets)
-(setq org-ellipsis " ▼"
-      org-superstar-remove-leading-stars t
-      org-hide-emphasis-markers t)
+  (setq org-src-fontify-natively t)
+  (require 'org-tempo)
+  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+  (add-hook 'org-mode-hook (lambda() (display-line-numbers-mode 0)))
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+  (add-hook 'org-mode-hook 'org-indent-mode)
+  (add-hook 'org-mode-hook 'visual-line-mode)
+  (add-hook 'org-mode-hook (lambda () (set-fringe-mode 10)))
+  (use-package org-bullets)
+  (setq org-ellipsis " ▼"
+        org-superstar-remove-leading-stars t
+        org-hide-emphasis-markers t)
 (add-hook 'org-mode-hook 'variable-pitch-mode)
 (add-hook 'org-mode-hook 'visual-line-mode)
 (set-face-attribute 'org-document-title nil :font jas/default-fixed-font :weight 'bold :height 1.3)
@@ -242,28 +245,6 @@
     "CANCELLED(c)"
     )))
 (setq org-agenda-remove-tags t)
-(setq org-agenda-prefix-format
-      '((agenda . " %i %-12:c%?-12t% s")
-        (todo . " %i %-12:c")
-        (tags . " %i %-12:c")
-        (search . " %i %-12:c")))
-(setq org-agenda-custom-commands
-      '(("v" "Main"
-         ((tags-todo "+PRIORITY=\"A\""
-                     ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo '("WAIT")))
-                      (org-agenda-overriding-header "High Priority Tasks:")))
-          (tags-todo "+PRIORITY=\"B\""
-                     ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo '("WAIT")))
-                      (org-agenda-overriding-header "Medium Priority Tasks:")))
-          (tags-todo "+PRIORITY=\"C\""
-                     ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo '("WAIT")))
-                      (org-agenda-overriding-header "Low Priority Tasks:")))
-          (agenda "")
-          (todo "WAIT"
-                ((org-agenda-overriding-header "On Hold:")))))
-        ("l" "Waitlist"
-         ((todo "WAIT"
-                ((org-agenda-overriding-header "On Hold:")))))))
 
 (require 'evil-org-agenda)
 (evil-org-agenda-set-keys)
@@ -296,14 +277,14 @@
 
 (use-package citar
   :custom
-  (citar-bibliography '("~/projects/writing/templates/refs.bib")))
+  (citar-bibliography '("~/projects/notes/shared/latex/templates/refs.bib")))
 (use-package citar-denote
   :diminish
   :after citar denote
   :config
   (citar-denote-mode)
   (setq citar-open-always-create-notes t))
-(setq citar-library-paths '("~/library/papers/"))
+(setq citar-library-paths '("~/library/papers/" "~/projects/notes/shared/bookshelf"))
 (setq citar-templates
       '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
         (suffix . "          ${=key= id:15}    ${=type=:12}    ${tags keywords:*}")
@@ -319,12 +300,14 @@
   :keymaps 'LaTeX-mode-map
 "C-<return>" 'LaTeX-insert-item
     )
+  (setq TeX-electric-sub-and-superscript t)
         (setq TeX-auto-save t)
         (setq TeX-parse-self t)
         (setq-default TeX-master nil)
         (use-package tex-mode
           :ensure auctex)
         (add-hook 'TeX-mode-hook 'LaTeX-math-mode)
+        (add-hook 'TeX-mode-hook 'electric-pair-mode)
         (add-hook 'TeX-mode-hook 'visual-line-mode)
         (add-hook 'TeX-mode-hook 'reftex-mode)
         (add-hook 'org-mode-hook 'org-toggle-pretty-entities)
@@ -336,7 +319,7 @@
                     (push '("\\mathbb{F}" . ?𝔽) prettify-symbols-alist)
                     ))
 
-(add-hook 'LaTeX-mode-hool 'electric-pair-mode)
+(add-hook 'LaTeX-mode-hook 'electric-pair-mode)
 (use-package yasnippet)
 (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
 (use-package yasnippet-snippets)
@@ -349,23 +332,34 @@
   (aas-set-snippets 'laas-mode
       "mk" (lambda () (interactive)
                   (yas-expand-snippet "$$0$"))
+      "\\[" (lambda () (interactive)
+                  (yas-expand-snippet "\\[$0\\]"))
     ;; set condition!
     :cond #'texmathp ; expand only while in math
     "spn" (lambda () (interactive)
              (yas-expand-snippet "\\Span($1)$0"))
+    "in" (lambda () (interactive)
+             (yas-expand-snippet "\\in"))
+    "sum" (lambda () (interactive)
+             (yas-expand-snippet "\\sum_{$1}^{$2}$0"))
+    "||" (lambda () (interactive)
+             (yas-expand-snippet "||$1||$0"))
     ;; add accent snippets
     :cond #'laas-object-on-left-condition
     "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
 
 (use-package flycheck
-  :diminish)
-    (use-package lsp-mode
-  :diminish
-   :hook  (lsp-mode . lsp-enable-which-key-integration))
-   (use-package lsp-ui)
-   (add-hook 'LaTeX-mode-hook 'lsp-mode)
-(setq lsp-headerline-breadcrumb-enable-diagnostics nil)
+:diminish)
+   (flycheck-add-mode 'tex-chktex 'LaTeX-mode)
+   (add-hook 'LaTeX-mode-hook 'flycheck-mode)
+   (add-hook 'LaTeX-mode-hook (lambda () (set-fringe-mode 30)))
+   (jas/leader-def
+  :states 'normal
+"cc" 'consult-flycheck
+"cg" 'consult-ripgrep
+)
 
 (use-package vterm)
-(add-hook 'vterm-mode-hook (lambda() (display-line-numbers-mode 0)))
-(add-hook 'eshell-mode-hook (lambda() (display-line-numbers-mode 0)))
+  (add-hook 'vterm-mode-hook (lambda() (display-line-numbers-mode 0)))
+  (add-hook 'eshell-mode-hook (lambda() (display-line-numbers-mode 0)))
+(setq delete-by-moving-to-trash t)

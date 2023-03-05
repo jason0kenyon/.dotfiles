@@ -80,39 +80,38 @@ Open pdfs in zathura
 ** keys
 *** evil
 #+begin_src emacs-lisp
-  (use-package undo-tree
+    (use-package undo-tree
     :diminish)
-  (global-undo-tree-mode)
-  (use-package evil
-    :init
-    (setq evil-undo-system 'undo-tree)
-    (setq evil-want-keybinding nil)
-    (setq evil-want-C-u-scroll t)
-    (setq evil-want-C-i-jump t)
-    (setq evil-want-C-w-delete nil)
-    (setq evil-want-integration t)
-    (setq evil-want-fine-undo t)
-    (setq evil-shift-width tab-width)
-    :config
-    (evil-mode 1))
+    (global-undo-tree-mode)
+    (use-package evil
+      :init
+      (setq evil-undo-system 'undo-tree)
+      (setq evil-want-keybinding nil)
+      (setq evil-want-C-u-scroll t)
+      (setq evil-want-C-i-jump t)
+      (setq evil-want-C-w-delete nil)
+      (setq evil-want-integration t)
+      (setq evil-want-fine-undo t)
+      (setq evil-shift-width tab-width)
+      :config
+      (evil-mode 1))
 
-  (use-package evil-escape
-    :diminish
-    :init
-    (setq-default evil-escape-key-sequence "jk")
-    (setq-default evil-escape-delay 0.1)
-    :config
-    (evil-escape-mode 1))
-  (use-package evil-collection
-    :diminish
-    :after evil
-    :config
-    (evil-collection-init))
+    (use-package evil-escape
+      :diminish
+      :init
+      (setq-default evil-escape-key-sequence "jk")
+      (setq-default evil-escape-delay 0.1)
+      :config
+      (evil-escape-mode 1))
+    (use-package evil-collection
+      :after evil
+      :config
+      (evil-collection-init))
 #+end_src
 *** general
 #+begin_src emacs-lisp
   (use-package which-key
-    :diminish
+    :diminish 
     :config
     (which-key-mode 1)
     (setq which-key-idle-delay 1))
@@ -132,6 +131,7 @@ Open pdfs in zathura
     "." 'find-file
     "," 'consult-buffer
     "fp" (lambda () (interactive) (find-file (expand-file-name "init.org" user-emacs-directory)))
+    "fr" 'consult-recent-file
     "hi" 'info
     "bn" 'switch-to-next-buffer
     "bv" 'switch-to-prev-buffer
@@ -190,33 +190,35 @@ Open pdfs in zathura
 #+end_src
 ** completion
 #+begin_src emacs-lisp
-(use-package savehist
-  :init
-  (savehist-mode))
-  (use-package vertico
-    :init
-    (vertico-mode))
-  (use-package vertico-directory
-    :after vertico
-    :ensure nil
-    ;; More convenient directory navigation commands
-    :bind (:map vertico-map
-                ("RET" . vertico-directory-enter)
-                ("DEL" . vertico-directory-delete-char)
-                ("M-DEL" . vertico-directory-delete-word)
-                ("C-k" . previous-line-or-history-element)
-                 ("C-j" . next-line-or-history-element))
-    ;; Tidy shadowed file names
-    :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
-  (use-package consult)
-  (use-package marginalia
-    :init (marginalia-mode))
-  (use-package embark)
-  (use-package embark-consult)
-  (use-package orderless
-    :custom
-    (completion-styles '(orderless basic))
-    (completion-category-overrides '((file (styles basic partial-completion)))))
+  (recentf-mode 1)
+    (use-package savehist
+      :init
+      (savehist-mode))
+      (use-package vertico
+        :init
+        (vertico-mode))
+      (use-package vertico-directory
+        :after vertico
+        :ensure nil
+        ;; More convenient directory navigation commands
+        :bind (:map vertico-map
+                    ("RET" . vertico-directory-enter)
+                    ("DEL" . vertico-directory-delete-char)
+                    ("M-DEL" . vertico-directory-delete-word)
+                    ("C-k" . previous-line-or-history-element)
+                     ("C-j" . next-line-or-history-element))
+        ;; Tidy shadowed file names
+        :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+      (use-package consult)
+      (use-package marginalia
+        :init (marginalia-mode))
+      (use-package embark)
+      (use-package embark-consult)
+      (use-package orderless
+        :custom
+        (completion-styles '(orderless basic))
+        (completion-category-overrides '((file (styles basic partial-completion)))))
+  (use-package consult-flycheck)
 #+end_src
 * org
 ** defaults
@@ -229,33 +231,34 @@ Open pdfs in zathura
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
   (add-hook 'org-mode-hook 'org-indent-mode)
   (add-hook 'org-mode-hook 'visual-line-mode)
+  (add-hook 'org-mode-hook (lambda () (set-fringe-mode 10)))
   (use-package org-bullets)
   (setq org-ellipsis " ▼"
         org-superstar-remove-leading-stars t
         org-hide-emphasis-markers t)
-  (add-hook 'org-mode-hook 'variable-pitch-mode)
-  (add-hook 'org-mode-hook 'visual-line-mode)
-  (set-face-attribute 'org-document-title nil :font jas/default-fixed-font :weight 'bold :height 1.3)
-  (dolist (face '((org-level-1 . 2.0)
-                  (org-level-2 . 2.0)
-                  (org-level-3 . 1.5)
-                  (org-level-4 . 1.2)
-                  (org-level-5 . 1.1)
-                  (org-level-6 . 1.1)
-                  (org-level-7 . 1.1)
-                  (org-level-8 . 1.1))) (set-face-attribute (car face) nil :font jas/default-variable-font :weight 'medium :height (cdr face)))
+(add-hook 'org-mode-hook 'variable-pitch-mode)
+(add-hook 'org-mode-hook 'visual-line-mode)
+(set-face-attribute 'org-document-title nil :font jas/default-fixed-font :weight 'bold :height 1.3)
+(dolist (face '((org-level-1 . 2.0)
+                (org-level-2 . 2.0)
+                (org-level-3 . 1.5)
+                (org-level-4 . 1.2)
+                (org-level-5 . 1.1)
+                (org-level-6 . 1.1)
+                (org-level-7 . 1.1)
+                (org-level-8 . 1.1))) (set-face-attribute (car face) nil :font jas/default-variable-font :weight 'medium :height (cdr face)))
 
-  (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
-  (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-  (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
-  (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
-  (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
+(set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+(set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
+(set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
+(set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+(set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+(set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+(set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
+(set-face-attribute 'line-number nil :inherit 'fixed-pitch)
+(set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
 #+end_src
 ** agenda
 #+begin_src emacs-lisp
@@ -275,28 +278,6 @@ Open pdfs in zathura
       "CANCELLED(c)"
       )))
   (setq org-agenda-remove-tags t)
-  (setq org-agenda-prefix-format
-        '((agenda . " %i %-12:c%?-12t% s")
-          (todo . " %i %-12:c")
-          (tags . " %i %-12:c")
-          (search . " %i %-12:c")))
-  (setq org-agenda-custom-commands
-        '(("v" "Main"
-           ((tags-todo "+PRIORITY=\"A\""
-                       ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo '("WAIT")))
-                        (org-agenda-overriding-header "High Priority Tasks:")))
-            (tags-todo "+PRIORITY=\"B\""
-                       ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo '("WAIT")))
-                        (org-agenda-overriding-header "Medium Priority Tasks:")))
-            (tags-todo "+PRIORITY=\"C\""
-                       ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo '("WAIT")))
-                        (org-agenda-overriding-header "Low Priority Tasks:")))
-            (agenda "")
-            (todo "WAIT"
-                  ((org-agenda-overriding-header "On Hold:")))))
-          ("l" "Waitlist"
-           ((todo "WAIT"
-                  ((org-agenda-overriding-header "On Hold:")))))))
 #+end_src
 ** keys
 #+begin_src emacs-lisp
@@ -316,33 +297,33 @@ Open pdfs in zathura
 #+end_src
 ** denote
 #+begin_src emacs-lisp
-  (use-package denote)
-  (setq denote-directory "~/projects/notes")
-  (setq denote-templates '((daily . "* Journal\n\n* Tasks\n** TODO [/]\n1. [ ] Mindfulness(10min)\n2. [ ] Journaling(5min)\n3. [ ] Check Out\n** Notes") (math-landing-page . "* meta-analysis\n* Source")))
+      (use-package denote)
+      (setq denote-directory "~/projects/notes")
+      (setq denote-templates '((daily . "* Journal\n\n* Tasks\n** TODO [/]\n1. [ ] Mindfulness(10min)\n2. [ ] Journaling(5min)\n3. [ ] Check Out\n** Notes") (math-landing-page . "* meta-analysis\n* Source")))
 
-  (defun daily-journal ()
-    "Create an entry tagged 'journal' with the date as its title."
-    (interactive)
-    (denote
-     (format-time-string "%A %e %B %Y") ; format like Tuesday 14 June 2022
-     '("daily")
-     'org
-     (concat denote-directory "/daily")
-     nil
-     'daily)) ; multiple keywords are a list of strings: '("one" "two")
+      (defun daily-journal ()
+        "Create an entry tagged 'journal' with the date as its title."
+        (interactive)
+        (denote
+         (format-time-string "%A %e %B %Y") ; format like Tuesday 14 June 2022
+         '("daily")
+         'org
+         (concat denote-directory "/daily")
+         nil
+         'daily)) ; multiple keywords are a list of strings: '("one" "two")
 #+end_src
 ** citar
 #+begin_src emacs-lisp
   (use-package citar
     :custom
-    (citar-bibliography '("~/projects/writing/templates/refs.bib")))
+    (citar-bibliography '("~/projects/notes/shared/latex/templates/refs.bib")))
   (use-package citar-denote
     :diminish
     :after citar denote
     :config
     (citar-denote-mode)
     (setq citar-open-always-create-notes t))
-  (setq citar-library-paths '("~/library/papers/"))
+  (setq citar-library-paths '("~/library/papers/" "~/projects/notes/shared/bookshelf"))
   (setq citar-templates
         '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
           (suffix . "          ${=key= id:15}    ${=type=:12}    ${tags keywords:*}")
@@ -357,30 +338,32 @@ Open pdfs in zathura
 * latex
 ** auctex
 #+begin_src emacs-lisp
-      (general-define-key
-  :keymaps 'LaTeX-mode-map
-"C-<return>" 'LaTeX-insert-item
-    )
-        (setq TeX-auto-save t)
-        (setq TeX-parse-self t)
-        (setq-default TeX-master nil)
-        (use-package tex-mode
-          :ensure auctex)
-        (add-hook 'TeX-mode-hook 'LaTeX-math-mode)
-        (add-hook 'TeX-mode-hook 'visual-line-mode)
-        (add-hook 'TeX-mode-hook 'reftex-mode)
-        (add-hook 'org-mode-hook 'org-toggle-pretty-entities)
-        (add-hook 'TeX-mode-hook (lambda () (TeX-fold-mode 1) (TeX-fold-buffer)))
-        (add-hook 'TeX-mode-hook 'prettify-symbols-mode)
-        (add-hook 'TeX-mode-hook
-                  (lambda ()
-                    (push '("\\mathbb{C}" . ?ℂ) prettify-symbols-alist)
-                    (push '("\\mathbb{F}" . ?𝔽) prettify-symbols-alist)
-                    ))
+        (general-define-key
+    :keymaps 'LaTeX-mode-map
+  "C-<return>" 'LaTeX-insert-item
+      )
+    (setq TeX-electric-sub-and-superscript t)
+          (setq TeX-auto-save t)
+          (setq TeX-parse-self t)
+          (setq-default TeX-master nil)
+          (use-package tex-mode
+            :ensure auctex)
+          (add-hook 'TeX-mode-hook 'LaTeX-math-mode)
+          (add-hook 'TeX-mode-hook 'electric-pair-mode)
+          (add-hook 'TeX-mode-hook 'visual-line-mode)
+          (add-hook 'TeX-mode-hook 'reftex-mode)
+          (add-hook 'org-mode-hook 'org-toggle-pretty-entities)
+          (add-hook 'TeX-mode-hook (lambda () (TeX-fold-mode 1) (TeX-fold-buffer)))
+          (add-hook 'TeX-mode-hook 'prettify-symbols-mode)
+          (add-hook 'TeX-mode-hook
+                    (lambda ()
+                      (push '("\\mathbb{C}" . ?ℂ) prettify-symbols-alist)
+                      (push '("\\mathbb{F}" . ?𝔽) prettify-symbols-alist)
+                      ))
 #+end_src
 ** snippets
 #+begin_src emacs-lisp
-(add-hook 'LaTeX-mode-hool 'electric-pair-mode)
+(add-hook 'LaTeX-mode-hook 'electric-pair-mode)
 (use-package yasnippet)
 (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
 (use-package yasnippet-snippets)
@@ -393,30 +376,41 @@ Open pdfs in zathura
   (aas-set-snippets 'laas-mode
       "mk" (lambda () (interactive)
                   (yas-expand-snippet "$$0$"))
+      "\\[" (lambda () (interactive)
+                  (yas-expand-snippet "\\[$0\\]"))
     ;; set condition!
     :cond #'texmathp ; expand only while in math
     "spn" (lambda () (interactive)
              (yas-expand-snippet "\\Span($1)$0"))
+    "in" (lambda () (interactive)
+             (yas-expand-snippet "\\in"))
+    "sum" (lambda () (interactive)
+             (yas-expand-snippet "\\sum_{$1}^{$2}$0"))
+    "||" (lambda () (interactive)
+             (yas-expand-snippet "||$1||$0"))
     ;; add accent snippets
     :cond #'laas-object-on-left-condition
     "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
 #+end_src
-** lsp
+** syntax
 #+begin_src emacs-lisp
-    (use-package flycheck
-  :diminish)
-    (use-package lsp-mode
-  :diminish
-   :hook  (lsp-mode . lsp-enable-which-key-integration))
-   (use-package lsp-ui)
-   (add-hook 'LaTeX-mode-hook 'lsp-mode)
-(setq lsp-headerline-breadcrumb-enable-diagnostics nil)
+       (use-package flycheck
+    :diminish)
+       (flycheck-add-mode 'tex-chktex 'LaTeX-mode)
+       (add-hook 'LaTeX-mode-hook 'flycheck-mode)
+       (add-hook 'LaTeX-mode-hook (lambda () (set-fringe-mode 30)))
+       (jas/leader-def
+      :states 'normal
+    "cc" 'consult-flycheck
+    "cg" 'consult-ripgrep
+    )
 #+end_src
 * terminal
 ** defaults
 #+begin_src emacs-lisp
-(use-package vterm)
-(add-hook 'vterm-mode-hook (lambda() (display-line-numbers-mode 0)))
-(add-hook 'eshell-mode-hook (lambda() (display-line-numbers-mode 0)))
+  (use-package vterm)
+  (add-hook 'vterm-mode-hook (lambda() (display-line-numbers-mode 0)))
+  (add-hook 'eshell-mode-hook (lambda() (display-line-numbers-mode 0)))
+(setq delete-by-moving-to-trash t)
 #+end_src
 
