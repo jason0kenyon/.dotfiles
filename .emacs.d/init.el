@@ -1,341 +1,369 @@
-(add-to-list 'load-path (expand-file-name "pers-config" user-emacs-directory))
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-(setq custom-file "~/.emacs.d/custom.el")
-(require 'package)
+  (add-to-list 'load-path (expand-file-name "pers-config" user-emacs-directory))
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+  (setq custom-file "~/.emacs.d/custom.el")
+  (require 'package)
 
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
+  (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                           ("elpa" . "https://elpa.gnu.org/packages/")))
 
-(package-initialize)
-(unless package-archive-contents
-  (package-refresh-contents))
+  (package-initialize)
+  (unless package-archive-contents
+    (package-refresh-contents))
 
-;; Initialize use-package
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
+  ;; Initialize use-package
+  (unless (package-installed-p 'use-package)
+    (package-install 'use-package))
 
-(require 'use-package)
-(setq use-package-always-ensure t)
+  (require 'use-package)
+  (setq use-package-always-ensure t)
 
-(use-package auto-package-update
-  :config
-  (auto-package-update-maybe))
-(use-package org-auto-tangle
-  :diminish
-  :init
-  (add-hook 'org-mode-hook 'org-auto-tangle-mode))
+  (use-package auto-package-update
+    :config
+    (auto-package-update-maybe))
+  (use-package org-auto-tangle
+    :diminish
+    :init
+    (add-hook 'org-mode-hook 'org-auto-tangle-mode))
 
-(defvar jas/window-inc-size-hor 20)
-(defvar jas/window-inc-size-vert 10)
-(defvar jas/default-font-size 180)
-(defvar jas/default-variable-font-size 180)
-(defvar jas/default-fixed-font "FiraMono")
-(defvar jas/default-variable-font "Genos")
-(setq inhibit-startup-message t)
-(setq tab-width 2)
-(blink-cursor-mode -1)
-(show-paren-mode -1)
-(scroll-bar-mode -1)
-(tool-bar-mode -1)
-(tooltip-mode -1)
-(menu-bar-mode -1)
-(set-fringe-mode 10)
-(global-display-line-numbers-mode 1)
-(setq display-line-numbers-type 'relative)
-(defun display-startup-echo-area-message ()
-  (message ""))
-(use-package helpful)
+  (defvar jas/window-inc-size-hor 20)
+  (defvar jas/window-inc-size-vert 10)
+  (defvar jas/default-font-size 180)
+  (defvar jas/default-variable-font-size 220)
+  (defvar jas/default-fixed-font "Martian Mono")
+  (defvar jas/default-variable-font "Cormorant Garamond")
+  (setq inhibit-startup-message t)
+(setq initial-scratch-message "")
+  (setq tab-width 2)
+  (blink-cursor-mode -1)
+  (show-paren-mode -1)
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1)
+  (tooltip-mode -1)
+  (menu-bar-mode -1)
+  (set-fringe-mode 10)
+  (global-display-line-numbers-mode 1)
+  (setq display-line-numbers-type 'relative)
+  (defun display-startup-echo-area-message ()
+    (message ""))
+  (use-package helpful)
+  (use-package no-littering
+    :init
+    (setq auto-save-file-name-transforms
+          `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 
+    (use-package openwith
+      :config
+      (openwith-mode 1))
+    (setq openwith-associations
+          (list
+           (list (openwith-make-extension-regexp
+                  '("pdf"))
+                 "zathura"
+                 '(file))))
 
-(use-package no-littering
-  :init
-  (setq auto-save-file-name-transforms
-        `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+    (use-package undo-tree
+    :diminish)
+    (global-undo-tree-mode)
+    (use-package evil
+      :init
+      (setq evil-undo-system 'undo-tree)
+      (setq evil-want-keybinding nil)
+      (setq evil-want-C-u-scroll t)
+      (setq evil-want-C-i-jump t)
+      (setq evil-want-C-w-delete nil)
+      (setq evil-want-integration t)
+      (setq evil-want-fine-undo t)
+      (setq evil-shift-width tab-width)
+      :config
+      (evil-mode 1))
 
-(use-package openwith
-  :config
-  (openwith-mode 1))
-(setq openwith-associations
-      (list
-       (list (openwith-make-extension-regexp
-              '("pdf"))
-             "zathura"
-             '(file))))
+    (use-package evil-escape
+      :diminish
+      :init
+      (setq-default evil-escape-key-sequence "jk")
+      (setq-default evil-escape-delay 0.1)
+      :config
+      (evil-escape-mode 1))
+    (use-package evil-collection
+      :after evil
+      :config
+      (evil-collection-init))
 
-(use-package undo-tree
-:diminish)
-(global-undo-tree-mode)
-(use-package evil
-  :init
-  (setq evil-undo-system 'undo-tree)
-  (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump t)
-  (setq evil-want-C-w-delete nil)
-  (setq evil-want-integration t)
-  (setq evil-want-fine-undo t)
-  (setq evil-shift-width tab-width)
-  :config
-  (evil-mode 1))
+  (use-package which-key
+    :diminish 
+    :config
+    (which-key-mode 1)
+    (setq which-key-idle-delay 1))
+  (use-package general
+    :config (general-evil-setup t))
+  (general-create-definer jas/leader-def
+    ;; :prefix my-leader
+    :prefix "SPC")
+  (general-define-key
+   "C-=" 'text-scale-increase
+   "C--" 'text-scale-decrease) 
+  (general-define-key
+   :keymaps 'read-passwd-map
+   "C-v" 'evil-paste-after)
+  (jas/leader-def
+    :states 'normal
+    "." 'find-file
+    "," 'consult-buffer
+    "fp" (lambda () (interactive) (find-file (expand-file-name "init.org" user-emacs-directory)))
+    "fr" 'consult-recent-file
+    "hi" 'info
+    "bn" 'switch-to-next-buffer
+    "bv" 'switch-to-prev-buffer
+    "bk" 'kill-buffer
+    "ck" 'kill-compilation
+    "oa" 'org-agenda
+    "hf" 'helpful-callable
+    "hv" 'helpful-variable
+    "wv" 'evil-window-vsplit
+    "ws" 'evil-window-split
+    "ww" 'evil-window-delete
+    "wl" 'evil-window-right
+    "wh" 'evil-window-left
+    "wk" 'evil-window-up
+    "wj" 'evil-window-down
+    "w]" (lambda () (interactive) (enlarge-window-horizontally jas/window-inc-size-hor)) 
+    "w[" (lambda () (interactive) (shrink-window-horizontally jas/window-inc-size-hor)) 
+    "w}" (lambda () (interactive) (enlarge-window jas/window-inc-size-vert)) 
+    "w{" (lambda () (interactive) (shrink-window jas/window-inc-size-vert)) 
+    "w=" 'balance-windows
+    "wt" 'tear-off-window
 
-(use-package evil-escape
-  :diminish
-  :init
-  (setq-default evil-escape-key-sequence "jk")
-  (setq-default evil-escape-delay 0.1)
-  :config
-  (evil-escape-mode 1))
-(use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init))
+    )
 
-(use-package which-key
-  :diminish 
-  :config
-  (which-key-mode 1)
-  (setq which-key-idle-delay 1))
-(use-package general
-  :config (general-evil-setup t))
-(general-create-definer jas/leader-def
-  ;; :prefix my-leader
-  :prefix "SPC")
-(general-define-key
- "C-=" 'text-scale-increase
- "C--" 'text-scale-decrease) 
-(general-define-key
- :keymaps 'read-passwd-map
- "C-v" 'evil-paste-after)
-(jas/leader-def
-  :states 'normal
-  "." 'find-file
-  "," 'consult-buffer
-  "fp" (lambda () (interactive) (find-file (expand-file-name "init.org" user-emacs-directory)))
-  "fr" 'consult-recent-file
-  "hi" 'info
-  "bn" 'switch-to-next-buffer
-  "bv" 'switch-to-prev-buffer
-  "oa" 'org-agenda
-  "hf" 'helpful-callable
-  "hv" 'helpful-variable
-  "wv" 'evil-window-vsplit
-  "ws" 'evil-window-split
-  "ww" 'evil-window-delete
-  "wl" 'evil-window-right
-  "wh" 'evil-window-left
-  "wk" 'evil-window-up
-  "wj" 'evil-window-down
-  "w]" (lambda () (interactive) (enlarge-window-horizontally jas/window-inc-size-hor)) 
-  "w[" (lambda () (interactive) (shrink-window-horizontally jas/window-inc-size-hor)) 
-  "w}" (lambda () (interactive) (enlarge-window jas/window-inc-size-vert)) 
-  "w{" (lambda () (interactive) (shrink-window jas/window-inc-size-vert)) 
-  "w=" 'balance-windows
-  "wt" 'tear-off-window
+  (set-face-attribute 'default nil :font jas/default-fixed-font :height jas/default-font-size )
+  (set-face-attribute 'fixed-pitch nil :font jas/default-fixed-font :height jas/default-font-size )
+  (set-face-attribute 'variable-pitch nil :font jas/default-variable-font :weight 'normal :height jas/default-variable-font-size )
+  (use-package all-the-icons)
+  (use-package doom-themes
+    :config
+    (setq doom-themes-enable-bold t    
+          doom-themes-enable-italic t)) 
+  (use-package kaolin-themes)
+  (load-theme 'doom-horizon t)
 
+        (use-package doom-modeline)
+(setq doom-modeline-height 40)
+  ;; Define your custom doom-modeline
+  (doom-modeline-def-modeline 'my-simple-line
+    '(bar matches buffer-info remote-host buffer-position parrot selection-info)
+    '(misc-info minor-modes input-method  major-mode process vcs checker))
+
+  ;; Set default mode-line
+  (add-hook 'doom-modeline-mode-hook
+            (lambda ()
+              (doom-modeline-set-modeline 'my-simple-line 'default)))
+
+  ;; Configure other mode-lines based on major modes
+  (add-to-list 'doom-modeline-mode-alist '(my-mode . my-simple-line))
+      (doom-modeline-mode)
+
+  (use-package counsel)
+  (recentf-mode 1)
+    (use-package savehist
+      :init
+      (savehist-mode))
+      (use-package vertico
+        :init
+        (vertico-mode))
+      (use-package vertico-directory
+        :after vertico
+        :ensure nil
+        ;; More convenient directory navigation commands
+        :bind (:map vertico-map
+                    ("RET" . vertico-directory-enter)
+                    ("DEL" . vertico-directory-delete-char)
+                    ("M-DEL" . vertico-directory-delete-word)
+                    ("C-k" . previous-line-or-history-element)
+                     ("C-j" . next-line-or-history-element))
+        ;; Tidy shadowed file names
+        :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+      (use-package consult)
+      (use-package marginalia
+        :init (marginalia-mode))
+      (use-package embark)
+      (use-package embark-consult)
+      (use-package orderless
+        :custom
+        (completion-styles '(orderless basic))
+        (completion-category-overrides '((file (styles basic partial-completion)))))
+  (use-package consult-flycheck)
+
+(setq org-src-preserve-indentation t)
+  (use-package org-superstar)
+  (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
+        (setq org-src-tab-acts-natively t)
+        (setq org-src-fontify-natively t)
+        (require 'org-tempo)
+        (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+        (add-hook 'org-mode-hook (lambda() (display-line-numbers-mode 0)))
+        (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+        (add-hook 'org-mode-hook 'org-indent-mode)
+        (add-hook 'org-mode-hook 'visual-line-mode)
+        (add-hook 'org-mode-hook (lambda () (set-fringe-mode 10)))
+    (setq org-ellipsis " ▼"
+            org-superstar-remove-leading-stars t
+            org-hide-emphasis-markers t
+            org-superstar-headline-bullets-list '("◉" "●" "○" "◆" "●" "○" "◆")
+            org-superstar-item-bullet-alist '((?+ . ?◆) (?- . ?•))
+            org-superstar-special-todo-items 'hide)
+      (add-hook 'org-mode-hook 'variable-pitch-mode)
+      (add-hook 'org-mode-hook 'visual-line-mode)
+      (set-face-attribute 'org-document-title nil :font jas/default-fixed-font :weight 'bold :height 1.3)
+      (dolist (face '((org-level-1 . 1.8)
+                      (org-level-2 . 1.6)
+                      (org-level-3 . 1.5)
+                      (org-level-4 . 1.2)
+                      (org-level-5 . 1.1)
+                      (org-level-6 . 1.1)
+                      (org-level-7 . 1.1)
+                      (org-level-8 . 1.1))) (set-face-attribute (car face) nil :font jas/default-variable-font :weight 'medium :height (cdr face)))
+
+      (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+      (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
+      (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+      (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
+      (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
+      (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+      (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+      (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+      (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
+      (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
+      (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
+
+  (setq org-directory "~/Dropbox/notes"
+        org-agenda-files '("~/Dropbox/notes" "~/Dropbox/notes/daily"))
+(setq org-id-locations-file (expand-file-name ".orgids" org-directory)
+(setq org-insert-heading-respect-content t)
+  (setq org-agenda-window-setup 'only-window)
+  (use-package org-fancy-priorities)
+  (setq org-fancy-priorities-list '("⚡" "⚠" "❗"))
+  (setq
+   org-agenda-block-separator ?\u25AA
+   org-todo-keywords
+   '((sequence
+      "TODO(t)"
+      "WAIT(w)"
+      "|"
+      "DONE(d)"
+      "CANCELLED(c)"
+      )))
+  (setq org-agenda-remove-tags t)
+
+    (setq org-clock-mode-line-entry nil)
+    (use-package org-pomodoro
+      :after org)
+  (setq org-pomodoro-length 45)
+  (setq org-pomodoro-short-break-length 25)
+  (setq org-pomodoro-long-break-length 45)
+      (jas/leader-def
+   :states 'normal
+        "op"  'org-pomodoro)
+
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys)
+      (jas/leader-def
+    :states 'normal
+    :keymaps 'org-mode-map
+     "mx" 'org-toggle-checkbox
+     "mp" 'org-priority
+     "mt" 'org-time-stamp)
+    (general-define-key
+   :keymaps 'org-mode-map
+  "C-<return>" 'org-meta-return
+  "M-<return>" 'org-insert-todo-heading
   )
 
-(set-face-attribute 'default nil :font jas/default-fixed-font :height jas/default-font-size )
-(set-face-attribute 'fixed-pitch nil :font jas/default-fixed-font :height jas/default-font-size )
-(set-face-attribute 'variable-pitch nil :font jas/default-variable-font :height jas/default-font-size )
-(use-package diminish)
-(use-package all-the-icons)
-(use-package doom-themes
-  :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t)) ; if nil, italics is universally disabled
-(use-package kaolin-themes)
-(load-theme 'kaolin-bubblegum t)
+      (use-package denote)
+      (setq denote-directory "~/Dropbox/notes")
+  
+      (setq denote-templates '((daily . "* Journal\n\n* Tasks\n** TODO [/]\n1. [ ] Mindfulness(10min)\n2. [ ] Journaling(5min)\n3. [ ] Check Out\n** Notes") (math-landing-page . "* meta-analysis\n* Source")))
 
-(setq initial-scratch-message "")
-(line-number-mode 0)
-(diminish 'evil-collection-unimpaired-mode)
-(diminish 'visual-line-mode)
-(with-eval-after-load 'yasnippet
-(diminish 'yas-minor-mode))
-(with-eval-after-load 'reftex
-  (diminish 'reftex-mode))
-(with-eval-after-load 'eldoc
-  (diminish 'eldoc-mode))
-(with-eval-after-load 'face-remap
-  (diminish 'buffer-face-mode))
-(with-eval-after-load 'org-indent
-  (diminish 'org-indent-mode))
-(with-eval-after-load 'face-remap
-  (diminish 'text-scale-mode))
+      (defun daily-journal ()
+        "Create an entry tagged 'journal' with the date as its title."
+        (interactive)
+        (denote
+         (format-time-string "%A %e %B %Y") ; format like Tuesday 14 June 2022
+         '("daily")
+         'org
+         (concat denote-directory "/daily")
+         nil
+         'daily)) ; multiple keywords are a list of strings: '("one" "two")
 
-(use-package counsel)
-(recentf-mode 1)
-  (use-package savehist
-    :init
-    (savehist-mode))
-    (use-package vertico
-      :init
-      (vertico-mode))
-    (use-package vertico-directory
-      :after vertico
-      :ensure nil
-      ;; More convenient directory navigation commands
-      :bind (:map vertico-map
-                  ("RET" . vertico-directory-enter)
-                  ("DEL" . vertico-directory-delete-char)
-                  ("M-DEL" . vertico-directory-delete-word)
-                  ("C-k" . previous-line-or-history-element)
-                   ("C-j" . next-line-or-history-element))
-      ;; Tidy shadowed file names
-      :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
-    (use-package consult)
-    (use-package marginalia
-      :init (marginalia-mode))
-    (use-package embark)
-    (use-package embark-consult)
-    (use-package orderless
-      :custom
-      (completion-styles '(orderless basic))
-      (completion-category-overrides '((file (styles basic partial-completion)))))
-(use-package consult-flycheck)
+  (use-package citar
+    :custom
+    (citar-bibliography '("~/Dropbox/shared-notes/latex/templates/refs.bib")))
+  (use-package citar-denote
+    :diminish
+    :after citar denote
+    :config
+    (citar-denote-mode)
+    (setq citar-open-always-create-notes t))
+  (setq citar-library-paths '("~/library/papers/" "~/Dropbox/shared-notes/bookshelf/papers"))
+  (setq citar-templates
+        '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
+          (suffix . "          ${=key= id:15}    ${=type=:12}    ${tags keywords:*}")
+          (preview . "${author editor} (${year issued date}) ${title}, ${journal journaltitle publisher container-title collection-title}.\n")
+          (note . "Notes on ${author editor}, ${title}")))
+  (setq citar-symbols
+        `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . "📁")
+          (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . "🖋️")
+          (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . "🔗")))
+  (setq citar-symbol-separator "  ")
 
-(use-package org-superstar)
-(add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
-      (setq org-src-tab-acts-natively t)
-      (setq org-src-fontify-natively t)
-      (require 'org-tempo)
-      (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-      (add-hook 'org-mode-hook (lambda() (display-line-numbers-mode 0)))
-      (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-      (add-hook 'org-mode-hook 'org-indent-mode)
-      (add-hook 'org-mode-hook 'visual-line-mode)
-      (add-hook 'org-mode-hook (lambda () (set-fringe-mode 10)))
-  (setq org-ellipsis " ▼"
-          org-superstar-remove-leading-stars t
-          org-hide-emphasis-markers t
-          org-superstar-headline-bullets-list '("◉" "●" "○" "◆" "●" "○" "◆")
-          org-superstar-item-bullet-alist '((?+ . ?◆) (?- . ?•))
-          org-superstar-special-todo-items 'hide)
-    (add-hook 'org-mode-hook 'variable-pitch-mode)
-    (add-hook 'org-mode-hook 'visual-line-mode)
-    (set-face-attribute 'org-document-title nil :font jas/default-fixed-font :weight 'bold :height 1.3)
-    (dolist (face '((org-level-1 . 2.0)
-                    (org-level-2 . 2.0)
-                    (org-level-3 . 1.5)
-                    (org-level-4 . 1.2)
-                    (org-level-5 . 1.1)
-                    (org-level-6 . 1.1)
-                    (org-level-7 . 1.1)
-                    (org-level-8 . 1.1))) (set-face-attribute (car face) nil :font jas/default-variable-font :weight 'medium :height (cdr face)))
+  (use-package mixed-pitch)
+  (add-hook 'LaTeX-mode-hook 'mixed-pitch-mode)
+        (general-define-key
+    :keymaps 'LaTeX-mode-map
+  "C-<return>" 'LaTeX-insert-item
+      )
+    (setq TeX-electric-sub-and-superscript t)
+          (setq TeX-parse-self t)
+          (setq-default TeX-master nil)
+          (use-package tex-mode
+            :ensure auctex)
+          (add-hook 'TeX-mode-hook 'LaTeX-math-mode)
+          (add-hook 'TeX-mode-hook 'electric-pair-mode)
+          (add-hook 'TeX-mode-hook 'visual-line-mode)
+          (add-hook 'TeX-mode-hook 'reftex-mode)
+          (add-hook 'org-mode-hook 'org-toggle-pretty-entities)
+          (add-hook 'TeX-mode-hook (lambda () (TeX-fold-mode 1) (TeX-fold-buffer)))
+          (add-hook 'TeX-mode-hook 'prettify-symbols-mode)
+          (add-hook 'TeX-mode-hook
+                    (lambda ()
+                      (push '("\\mathbb{C}" . ?ℂ) prettify-symbols-alist)
+                      (push '("\\mathbb{F}" . ?𝔽) prettify-symbols-alist)
+                      ))
+(setq-default LaTeX-default-offset 4)
 
-    (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
-    (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
-    (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-    (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
-    (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
-    (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-    (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-    (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-    (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
-    (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
-    (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
-
-(setq org-directory "~/Dropbox/notes"
-      org-agenda-files '("~/Dropbox/notes" "~/Dropbox/notes/daily"))
-(setq org-agenda-window-setup 'only-window)
-(use-package org-fancy-priorities)
-(setq org-fancy-priorities-list '("⚡" "⚠" "❗"))
-(setq
- org-agenda-block-separator ?\u25AA
- org-todo-keywords
- '((sequence
-    "TODO(t)"
-    "WAIT(w)"
-    "|"
-    "DONE(d)"
-    "CANCELLED(c)"
-    )))
-(setq org-agenda-remove-tags t)
-
-(setq org-clock-mode-line-entry nil)
-  (use-package org-pomodoro
-    :after org)
-(setq org-pomodoro-length 45)
-(setq org-pomodoro-short-break-length 25)
-(setq org-pomodoro-long-break-length 45)
-    (jas/leader-def
- :states 'normal
-      "op"  'org-pomodoro)
-
-(require 'evil-org-agenda)
-(evil-org-agenda-set-keys)
-    (jas/leader-def
-  :states 'normal
-  :keymaps 'org-mode-map
-   "mx" 'org-toggle-checkbox
-   "mp" 'org-priority
-   "mt" 'org-time-stamp)
-  (general-define-key
- :keymaps 'org-mode-map
-"C-<return>" 'org-meta-return
-"M-<return>" 'org-insert-todo-heading
-)
-
-(use-package denote)
-(setq denote-directory "~/Dropbox/notes")
-
-(setq denote-templates '((daily . "* Journal\n\n* Tasks\n** TODO [/]\n1. [ ] Mindfulness(10min)\n2. [ ] Journaling(5min)\n3. [ ] Check Out\n** Notes") (math-landing-page . "* meta-analysis\n* Source")))
-
-(defun daily-journal ()
-  "Create an entry tagged 'journal' with the date as its title."
-  (interactive)
-  (denote
-   (format-time-string "%A %e %B %Y") ; format like Tuesday 14 June 2022
-   '("daily")
-   'org
-   (concat denote-directory "/daily")
-   nil
-   'daily)) ; multiple keywords are a list of strings: '("one" "two")
-
-(use-package citar
-  :custom
-  (citar-bibliography '("~/Dropbox/shared-notes/latex/templates/refs.bib")))
-(use-package citar-denote
-  :diminish
-  :after citar denote
-  :config
-  (citar-denote-mode)
-  (setq citar-open-always-create-notes t))
-(setq citar-library-paths '("~/library/papers/" "~/Dropbox/shared-notes/bookshelf/papers"))
-(setq citar-templates
-      '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
-        (suffix . "          ${=key= id:15}    ${=type=:12}    ${tags keywords:*}")
-        (preview . "${author editor} (${year issued date}) ${title}, ${journal journaltitle publisher container-title collection-title}.\n")
-        (note . "Notes on ${author editor}, ${title}")))
-(setq citar-symbols
-      `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . "📁")
-        (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . "🖋️")
-        (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . "🔗")))
-(setq citar-symbol-separator "  ")
-
-(general-define-key
-  :keymaps 'LaTeX-mode-map
-"C-<return>" 'LaTeX-insert-item
-    )
-  (setq TeX-electric-sub-and-superscript t)
-        (setq TeX-auto-save t)
-        (setq TeX-parse-self t)
-        (setq-default TeX-master nil)
-        (use-package tex-mode
-          :ensure auctex)
-        (add-hook 'TeX-mode-hook 'LaTeX-math-mode)
-        (add-hook 'TeX-mode-hook 'electric-pair-mode)
-        (add-hook 'TeX-mode-hook 'visual-line-mode)
-        (add-hook 'TeX-mode-hook 'reftex-mode)
-        (add-hook 'org-mode-hook 'org-toggle-pretty-entities)
-        (add-hook 'TeX-mode-hook (lambda () (TeX-fold-mode 1) (TeX-fold-buffer)))
-        (add-hook 'TeX-mode-hook 'prettify-symbols-mode)
-        (add-hook 'TeX-mode-hook
-                  (lambda ()
-                    (push '("\\mathbb{C}" . ?ℂ) prettify-symbols-alist)
-                    (push '("\\mathbb{F}" . ?𝔽) prettify-symbols-alist)
-                    ))
+(custom-set-variables
+ '(TeX-fold-macro-spec-list
+  '(("[f]"
+    ("footnote" "marginpar"))
+   ("[c]"
+    ("cite"))
+   ("[l]"
+    ("label"))
+   ("[r]"
+    ("ref" "pageref" "eqref" "footref"))
+   ("[i]"
+    ("index" "glossary"))
+   ("[1]:||*"
+    ("item"))
+   ("..."
+    ("dots"))
+   ("(C)"
+    ("copyright"))
+   ("(R)"
+    ("textregistered"))
+   ("TM"
+    ("texttrademark"))
+   (1
+    ("part" "chapter" "section" "subsection" "subsubsection" "paragraph" "subparagraph" "part*" "chapter*" "section*" "subsection*" "subsubsection*" "paragraph*" "subparagraph*" "emph" "textit" "textsl" "textmd" "textrm" "textsf" "texttt" "textbf" "mathbf" "textsc" "textup")))))
 
 (add-hook 'LaTeX-mode-hook 'electric-pair-mode)
 (use-package yasnippet)
@@ -366,16 +394,32 @@
     :cond #'laas-object-on-left-condition
     "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
 
-(use-package flycheck
-:diminish)
-   (flycheck-add-mode 'tex-chktex 'LaTeX-mode)
-   (add-hook 'LaTeX-mode-hook 'flycheck-mode)
-   (add-hook 'LaTeX-mode-hook (lambda () (set-fringe-mode 30)))
-   (jas/leader-def
-  :states 'normal
-"cc" 'consult-flycheck
-"cg" 'consult-ripgrep
-)
+(defun my-hide-compilation-buffer (proc)
+  "Hide the compile buffer `PROC' is ignored."
+  (let* ((window (get-buffer-window "*compilation*"))
+         (frame (window-frame window)))
+    (ignore-errors
+      (delete-window window))))
+
+(add-hook 'compilation-start-hook 'my-hide-compilation-buffer)
+(add-hook 'LaTeX-mode-hook (lambda () (setq compile-command "latexmk -pvc -pdf --view=none")))
+  (setq dictionary-server "localhost")
+       (use-package flycheck
+    :diminish)
+       (flycheck-add-mode 'tex-chktex 'LaTeX-mode)
+       (add-hook 'LaTeX-mode-hook 'flycheck-mode)
+       (add-hook 'LaTeX-mode-hook (lambda () (set-fringe-mode 30)))
+       (jas/leader-def
+      :states 'normal
+    "sf" 'consult-flycheck
+    "sg" 'consult-ripgrep
+    "sw" 'dictionary-search
+    "cc" 'flyspell-correct-at-point
+    "C"  'compile
+    )
+    (use-package flyspell-correct)
+    (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+    (add-hook 'org-mode-hook 'flyspell-mode)
 
 (server-start)
   (use-package exwm)

@@ -33,6 +33,7 @@
     :init
     (add-hook 'org-mode-hook 'org-auto-tangle-mode))
     #+end_src
+
 ** ui tweaks
 Set some personal variables and eliminate weird emacs defaults
 #+begin_src emacs-lisp
@@ -40,10 +41,11 @@ Set some personal variables and eliminate weird emacs defaults
   (defvar jas/window-inc-size-hor 20)
   (defvar jas/window-inc-size-vert 10)
   (defvar jas/default-font-size 180)
-  (defvar jas/default-variable-font-size 180)
-  (defvar jas/default-fixed-font "FiraMono")
-  (defvar jas/default-variable-font "Genos")
+  (defvar jas/default-variable-font-size 220)
+  (defvar jas/default-fixed-font "Martian Mono")
+  (defvar jas/default-variable-font "Cormorant Garamond")
   (setq inhibit-startup-message t)
+(setq initial-scratch-message "")
   (setq tab-width 2)
   (blink-cursor-mode -1)
   (show-paren-mode -1)
@@ -57,13 +59,12 @@ Set some personal variables and eliminate weird emacs defaults
   (defun display-startup-echo-area-message ()
     (message ""))
   (use-package helpful)
-
-
   (use-package no-littering
     :init
     (setq auto-save-file-name-transforms
           `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 #+end_src
+
 ** openwith
 Open pdfs in zathura
 #+begin_src emacs-lisp
@@ -77,6 +78,7 @@ Open pdfs in zathura
                  "zathura"
                  '(file))))
 #+end_src
+
 ** keys
 *** evil
 #+begin_src emacs-lisp
@@ -108,6 +110,7 @@ Open pdfs in zathura
       :config
       (evil-collection-init))
 #+end_src
+
 *** general
 #+begin_src emacs-lisp
   (use-package which-key
@@ -135,6 +138,8 @@ Open pdfs in zathura
     "hi" 'info
     "bn" 'switch-to-next-buffer
     "bv" 'switch-to-prev-buffer
+    "bk" 'kill-buffer
+    "ck" 'kill-compilation
     "oa" 'org-agenda
     "hf" 'helpful-callable
     "hv" 'helpful-variable
@@ -154,43 +159,44 @@ Open pdfs in zathura
 
     )
 #+end_src
+
 * ui
 ** theme
 #+begin_src emacs-lisp
   (set-face-attribute 'default nil :font jas/default-fixed-font :height jas/default-font-size )
   (set-face-attribute 'fixed-pitch nil :font jas/default-fixed-font :height jas/default-font-size )
-  (set-face-attribute 'variable-pitch nil :font jas/default-variable-font :height jas/default-font-size )
-  (use-package diminish)
+  (set-face-attribute 'variable-pitch nil :font jas/default-variable-font :weight 'normal :height jas/default-variable-font-size )
   (use-package all-the-icons)
   (use-package doom-themes
     :config
-    ;; Global settings (defaults)
-    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-          doom-themes-enable-italic t)) ; if nil, italics is universally disabled
+    (setq doom-themes-enable-bold t    
+          doom-themes-enable-italic t)) 
   (use-package kaolin-themes)
-  (load-theme 'kaolin-bubblegum t)
+  (load-theme 'doom-horizon t)
 #+end_src
-** modeline
-#+begin_src emacs-lisp
-  (setq initial-scratch-message "")
-  (line-number-mode 0)
-  (diminish 'evil-collection-unimpaired-mode)
-  (diminish 'visual-line-mode)
-  (with-eval-after-load 'yasnippet
-  (diminish 'yas-minor-mode))
-  (with-eval-after-load 'reftex
-    (diminish 'reftex-mode))
-  (with-eval-after-load 'eldoc
-    (diminish 'eldoc-mode))
-  (with-eval-after-load 'face-remap
-    (diminish 'buffer-face-mode))
-  (with-eval-after-load 'org-indent
-    (diminish 'org-indent-mode))
-  (with-eval-after-load 'face-remap
-    (diminish 'text-scale-mode))
 
+** modeline
+I like a simple modeline without distractions.
+#+begin_src emacs-lisp
+        (use-package doom-modeline)
+(setq doom-modeline-height 40)
+  ;; Define your custom doom-modeline
+  (doom-modeline-def-modeline 'my-simple-line
+    '(bar matches buffer-info remote-host buffer-position parrot selection-info)
+    '(misc-info minor-modes input-method  major-mode process vcs checker))
+
+  ;; Set default mode-line
+  (add-hook 'doom-modeline-mode-hook
+            (lambda ()
+              (doom-modeline-set-modeline 'my-simple-line 'default)))
+
+  ;; Configure other mode-lines based on major modes
+  (add-to-list 'doom-modeline-mode-alist '(my-mode . my-simple-line))
+      (doom-modeline-mode)
 #+end_src
+
 ** completion
+A variety of necessities for searching
 #+begin_src emacs-lisp
   (use-package counsel)
   (recentf-mode 1)
@@ -223,55 +229,60 @@ Open pdfs in zathura
         (completion-category-overrides '((file (styles basic partial-completion)))))
   (use-package consult-flycheck)
 #+end_src
+
 * org
 ** defaults
 #+begin_src emacs-lisp
-(use-package org-superstar)
-(add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
-      (setq org-src-tab-acts-natively t)
-      (setq org-src-fontify-natively t)
-      (require 'org-tempo)
-      (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-      (add-hook 'org-mode-hook (lambda() (display-line-numbers-mode 0)))
-      (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-      (add-hook 'org-mode-hook 'org-indent-mode)
+(setq org-src-preserve-indentation t)
+  (use-package org-superstar)
+  (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
+        (setq org-src-tab-acts-natively t)
+        (setq org-src-fontify-natively t)
+        (require 'org-tempo)
+        (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+        (add-hook 'org-mode-hook (lambda() (display-line-numbers-mode 0)))
+        (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+        (add-hook 'org-mode-hook 'org-indent-mode)
+        (add-hook 'org-mode-hook 'visual-line-mode)
+        (add-hook 'org-mode-hook (lambda () (set-fringe-mode 10)))
+    (setq org-ellipsis " ▼"
+            org-superstar-remove-leading-stars t
+            org-hide-emphasis-markers t
+            org-superstar-headline-bullets-list '("◉" "●" "○" "◆" "●" "○" "◆")
+            org-superstar-item-bullet-alist '((?+ . ?◆) (?- . ?•))
+            org-superstar-special-todo-items 'hide)
+      (add-hook 'org-mode-hook 'variable-pitch-mode)
       (add-hook 'org-mode-hook 'visual-line-mode)
-      (add-hook 'org-mode-hook (lambda () (set-fringe-mode 10)))
-  (setq org-ellipsis " ▼"
-          org-superstar-remove-leading-stars t
-          org-hide-emphasis-markers t
-          org-superstar-headline-bullets-list '("◉" "●" "○" "◆" "●" "○" "◆")
-          org-superstar-item-bullet-alist '((?+ . ?◆) (?- . ?•))
-          org-superstar-special-todo-items 'hide)
-    (add-hook 'org-mode-hook 'variable-pitch-mode)
-    (add-hook 'org-mode-hook 'visual-line-mode)
-    (set-face-attribute 'org-document-title nil :font jas/default-fixed-font :weight 'bold :height 1.3)
-    (dolist (face '((org-level-1 . 2.0)
-                    (org-level-2 . 2.0)
-                    (org-level-3 . 1.5)
-                    (org-level-4 . 1.2)
-                    (org-level-5 . 1.1)
-                    (org-level-6 . 1.1)
-                    (org-level-7 . 1.1)
-                    (org-level-8 . 1.1))) (set-face-attribute (car face) nil :font jas/default-variable-font :weight 'medium :height (cdr face)))
+      (set-face-attribute 'org-document-title nil :font jas/default-fixed-font :weight 'bold :height 1.3)
+      (dolist (face '((org-level-1 . 1.8)
+                      (org-level-2 . 1.6)
+                      (org-level-3 . 1.5)
+                      (org-level-4 . 1.2)
+                      (org-level-5 . 1.1)
+                      (org-level-6 . 1.1)
+                      (org-level-7 . 1.1)
+                      (org-level-8 . 1.1))) (set-face-attribute (car face) nil :font jas/default-variable-font :weight 'medium :height (cdr face)))
 
-    (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
-    (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
-    (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
-    (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
-    (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
-    (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-    (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-    (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-    (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
-    (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
-    (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
+      (set-face-attribute 'org-block nil    :foreground nil :inherit 'fixed-pitch)
+      (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
+      (set-face-attribute 'org-formula nil  :inherit 'fixed-pitch)
+      (set-face-attribute 'org-code nil     :inherit '(shadow fixed-pitch))
+      (set-face-attribute 'org-table nil    :inherit '(shadow fixed-pitch))
+      (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+      (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+      (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+      (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
+      (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
+      (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
 #+end_src
+
 ** agenda
 *** defaults
 #+begin_src emacs-lisp
   (setq org-directory "~/Dropbox/notes"
         org-agenda-files '("~/Dropbox/notes" "~/Dropbox/notes/daily"))
+(setq org-id-locations-file (expand-file-name ".orgids" org-directory)
+(setq org-insert-heading-respect-content t)
   (setq org-agenda-window-setup 'only-window)
   (use-package org-fancy-priorities)
   (setq org-fancy-priorities-list '("⚡" "⚠" "❗"))
@@ -287,6 +298,7 @@ Open pdfs in zathura
       )))
   (setq org-agenda-remove-tags t)
 #+end_src
+
 *** pomodoro
 #+begin_src emacs-lisp
     (setq org-clock-mode-line-entry nil)
@@ -299,7 +311,9 @@ Open pdfs in zathura
    :states 'normal
         "op"  'org-pomodoro)
 #+end_src
+
 ** keys
+The default keybindings for org-agenda are unusable.
 #+begin_src emacs-lisp
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys)
@@ -315,7 +329,9 @@ Open pdfs in zathura
   "M-<return>" 'org-insert-todo-heading
   )
 #+end_src
+
 ** denote
+A useful note taking plugin
 #+begin_src emacs-lisp
       (use-package denote)
       (setq denote-directory "~/Dropbox/notes")
@@ -333,6 +349,7 @@ Open pdfs in zathura
          nil
          'daily)) ; multiple keywords are a list of strings: '("one" "two")
 #+end_src
+
 ** citar
 #+begin_src emacs-lisp
   (use-package citar
@@ -356,15 +373,17 @@ Open pdfs in zathura
           (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . "🔗")))
   (setq citar-symbol-separator "  ")
 #+end_src
+
 * latex
 ** auctex
 #+begin_src emacs-lisp
+  (use-package mixed-pitch)
+  (add-hook 'LaTeX-mode-hook 'mixed-pitch-mode)
         (general-define-key
     :keymaps 'LaTeX-mode-map
   "C-<return>" 'LaTeX-insert-item
       )
     (setq TeX-electric-sub-and-superscript t)
-          (setq TeX-auto-save t)
           (setq TeX-parse-self t)
           (setq-default TeX-master nil)
           (use-package tex-mode
@@ -381,7 +400,39 @@ Open pdfs in zathura
                       (push '("\\mathbb{C}" . ?ℂ) prettify-symbols-alist)
                       (push '("\\mathbb{F}" . ?𝔽) prettify-symbols-alist)
                       ))
+(setq-default LaTeX-default-offset 4)
 #+end_src
+
+** folding
+#+begin_src emacs-lisp
+(custom-set-variables
+ '(TeX-fold-macro-spec-list
+  '(("[f]"
+    ("footnote" "marginpar"))
+   ("[c]"
+    ("cite"))
+   ("[l]"
+    ("label"))
+   ("[r]"
+    ("ref" "pageref" "eqref" "footref"))
+   ("[i]"
+    ("index" "glossary"))
+   ("[1]:||*"
+    ("item"))
+   ("..."
+    ("dots"))
+   ("(C)"
+    ("copyright"))
+   ("(R)"
+    ("textregistered"))
+   ("TM"
+    ("texttrademark"))
+   (1
+    ("part" "chapter" "section" "subsection" "subsubsection" "paragraph" "subparagraph" "part*" "chapter*" "section*" "subsection*" "subsubsection*" "paragraph*" "subparagraph*" "emph" "textit" "textsl" "textmd" "textrm" "textsf" "texttt" "textbf" "mathbf" "textsc" "textup")))))
+
+
+#+end_src
+
 ** snippets
 #+begin_src emacs-lisp
 (add-hook 'LaTeX-mode-hook 'electric-pair-mode)
@@ -413,8 +464,19 @@ Open pdfs in zathura
     :cond #'laas-object-on-left-condition
     "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
 #+end_src
+
 ** syntax
 #+begin_src emacs-lisp
+(defun my-hide-compilation-buffer (proc)
+  "Hide the compile buffer `PROC' is ignored."
+  (let* ((window (get-buffer-window "*compilation*"))
+         (frame (window-frame window)))
+    (ignore-errors
+      (delete-window window))))
+
+(add-hook 'compilation-start-hook 'my-hide-compilation-buffer)
+(add-hook 'LaTeX-mode-hook (lambda () (setq compile-command "latexmk -pvc -pdf --view=none")))
+  (setq dictionary-server "localhost")
        (use-package flycheck
     :diminish)
        (flycheck-add-mode 'tex-chktex 'LaTeX-mode)
@@ -422,13 +484,18 @@ Open pdfs in zathura
        (add-hook 'LaTeX-mode-hook (lambda () (set-fringe-mode 30)))
        (jas/leader-def
       :states 'normal
-    "cc" 'consult-flycheck
-    "cg" 'consult-ripgrep
+    "sf" 'consult-flycheck
+    "sg" 'consult-ripgrep
+    "sw" 'dictionary-search
+    "cc" 'flyspell-correct-at-point
+    "C"  'compile
     )
+    (use-package flyspell-correct)
+    (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+    (add-hook 'org-mode-hook 'flyspell-mode)
 #+end_src
-* desktop
-** exwm
-*** helper functions
+
+* exwm
 #+begin_src emacs-lisp
 (server-start)
   (use-package exwm)
@@ -461,9 +528,7 @@ Open pdfs in zathura
   (defun jas/run-in-background (command)
     (let ((command-parts (split-string command "[ ]+")))
       (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
-#+end_src
-*** movement
-#+begin_src emacs-lisp
+
 (setq exwm-workspace-number 5)
  (setq exwm-input-global-keys
         `(
@@ -493,79 +558,69 @@ Open pdfs in zathura
                           (exwm-workspace-switch-create ,i))))
                     (number-sequence 0 9))))
 
+(jas/bind-command
+"<XF86AudioMute>" "amixer set Master toggle"
+"<XF86AudioLowerVolume>" "amixer set Master 10%-"
+"<XF86AudioRaiseVolume>" "amixer set Master 10%+"
+"<XF86MonBrightnessUp>" "brightnessctl set 10%+"
+"<XF86MonBrightnessDown>" "brightnessctl set 10%-"
+"s-b" "qutebrowser")
+(exwm-input-set-key (kbd "s-x") 'counsel-linux-app)
+
+(defvar jas/polybar-process nil
+  "Holds the process of the running Polybar instance, if any")
+
+(defun jas/kill-panel ()
+  (interactive)
+  (when jas/polybar-process
+    (ignore-errors
+      (kill-process jas/polybar-process)))
+  (setq jas/polybar-process nil))
+
+(defun jas/start-panel ()
+  (interactive)
+  (jas/kill-panel)
+  (setq jas/polybar-process (start-process-shell-command "polybar" nil "polybar panel")))
+
+(defun jas/polybar-exwm-workspace ()
+  (pcase exwm-workspace-current-index
+    (0 "")
+    (1 "")
+    (2 "")
+    (3 "")
+    (4 "")))
+(defun jas/send-polybar-hook (module-name hook-index)
+  (start-process-shell-command "polybar-msg" nil (format "polybar-msg hook %s %s" module-name hook-index)))
+
+(defun jas/send-polybar-exwm-workspace ()
+  (jas/send-polybar-hook "exwm-workspace" 1))
+
+;; Update panel indicator when workspace changes
+(add-hook 'exwm-workspace-switch-hook #'jas/send-polybar-exwm-workspace)
+
+(require 'exwm-randr)
+(exwm-randr-enable)
+(start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 3456x2160 --pos 0x0 --rotate normal --output DP-1 --off --output DP-2 --off --output DP-3 --off")
+(defun jas/exwm-init-hook ()
+  (jas/run-in-background "dropbox")
+  (jas/run-in-background "nm-applet")
+  (jas/run-in-background "blueman-applet")
+  (jas/run-in-background "pasystray")
+  ;; Make workspace 1 be the one where we land at startup
+  (exwm-workspace-switch-create 1)
+ ;; Start the Polybar panel
+  (jas/start-panel)
+  )
+;; When EXWM starts up, do some extra confifuration
+(add-hook 'exwm-init-hook #'jas/exwm-init-hook)
+(exwm-enable)
+
+(use-package vterm)
+  (add-hook 'vterm-mode-hook (lambda() (display-line-numbers-mode 0)))
+  (add-hook 'eshell-mode-hook (lambda() (display-line-numbers-mode 0)))
+(setq delete-by-moving-to-trash t)
+(jas/leader-def
+:states 'normal
+"t" 'vterm)
 #+end_src
-*** keys
-#+begin_src emacs-lisp
-  (jas/bind-command
-  "<XF86AudioMute>" "amixer set Master toggle"
-  "<XF86AudioLowerVolume>" "amixer set Master 10%-"
-  "<XF86AudioRaiseVolume>" "amixer set Master 10%+"
-  "<XF86MonBrightnessUp>" "brightnessctl set 10%+"
-  "<XF86MonBrightnessDown>" "brightnessctl set 10%-"
-  "s-b" "qutebrowser")
-  (exwm-input-set-key (kbd "s-x") 'counsel-linux-app)
-#+end_src
-*** polybar
-#+begin_src emacs-lisp
-  (defvar jas/polybar-process nil
-    "Holds the process of the running Polybar instance, if any")
-
-  (defun jas/kill-panel ()
-    (interactive)
-    (when jas/polybar-process
-      (ignore-errors
-        (kill-process jas/polybar-process)))
-    (setq jas/polybar-process nil))
-
-  (defun jas/start-panel ()
-    (interactive)
-    (jas/kill-panel)
-    (setq jas/polybar-process (start-process-shell-command "polybar" nil "polybar panel")))
-
-  (defun jas/polybar-exwm-workspace ()
-    (pcase exwm-workspace-current-index
-      (0 "")
-      (1 "")
-      (2 "")
-      (3 "")
-      (4 "")))
-  (defun jas/send-polybar-hook (module-name hook-index)
-    (start-process-shell-command "polybar-msg" nil (format "polybar-msg hook %s %s" module-name hook-index)))
-
-  (defun jas/send-polybar-exwm-workspace ()
-    (jas/send-polybar-hook "exwm-workspace" 1))
-
-  ;; Update panel indicator when workspace changes
-  (add-hook 'exwm-workspace-switch-hook #'jas/send-polybar-exwm-workspace)
-#+end_src
-*** init hook
-#+begin_src emacs-lisp
-  (require 'exwm-randr)
-  (exwm-randr-enable)
-  (start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 3456x2160 --pos 0x0 --rotate normal --output DP-1 --off --output DP-2 --off --output DP-3 --off")
-  (defun jas/exwm-init-hook ()
-    (jas/run-in-background "dropbox")
-    (jas/run-in-background "nm-applet")
-    (jas/run-in-background "blueman-applet")
-    (jas/run-in-background "pasystray")
-    ;; Make workspace 1 be the one where we land at startup
-    (exwm-workspace-switch-create 1)
-   ;; Start the Polybar panel
-    (jas/start-panel)
-    )
-  ;; When EXWM starts up, do some extra confifuration
-  (add-hook 'exwm-init-hook #'jas/exwm-init-hook)
-  (exwm-enable)
-#+end_src
-** terminal
-#+begin_src emacs-lisp
-    (use-package vterm)
-    (add-hook 'vterm-mode-hook (lambda() (display-line-numbers-mode 0)))
-    (add-hook 'eshell-mode-hook (lambda() (display-line-numbers-mode 0)))
-  (setq delete-by-moving-to-trash t)
-  (jas/leader-def
-  :states 'normal
-  "t" 'vterm)
-#+end_src
-
 

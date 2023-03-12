@@ -1,2 +1,2 @@
-$pdflatex = 'xelatex -interaction=nonstopmode';
+$pdflatex = 'pdflatex -interaction=nonstopmode';
 $pdf_previewer = 'zathura';
