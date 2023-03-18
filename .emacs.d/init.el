@@ -51,15 +51,15 @@
     (setq auto-save-file-name-transforms
           `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 
-    (use-package openwith
-      :config
-      (openwith-mode 1))
-    (setq openwith-associations
-          (list
-           (list (openwith-make-extension-regexp
-                  '("pdf"))
-                 "zathura"
-                 '(file))))
+;;    (use-package openwith
+;;      :config
+;;      (openwith-mode 1))
+;;    (setq openwith-associations
+;;          (list
+;;           (list (openwith-make-extension-regexp
+;;                  '("pdf"))
+;;                 "zathura"
+;;                 '(file))))
 
     (use-package undo-tree
     :diminish)
@@ -144,13 +144,13 @@
     (setq doom-themes-enable-bold t    
           doom-themes-enable-italic t)) 
   (use-package kaolin-themes)
-  (load-theme 'doom-horizon t)
+  (load-theme 'doom-city-lights t)
 
         (use-package doom-modeline)
-(setq doom-modeline-height 40)
+(setq doom-modeline-height 60)
   ;; Define your custom doom-modeline
   (doom-modeline-def-modeline 'my-simple-line
-    '(bar matches buffer-info remote-host buffer-position parrot selection-info)
+    '(bar matches buffer-info remote-host  parrot selection-info)
     '(misc-info minor-modes input-method  major-mode process vcs checker))
 
   ;; Set default mode-line
@@ -193,15 +193,19 @@
         (completion-category-overrides '((file (styles basic partial-completion)))))
   (use-package consult-flycheck)
 
+(use-package all-the-icons-dired)
+(setq all-the-icons-dired-monochrome nil)
+(add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
+
 (setq org-src-preserve-indentation t)
   (use-package org-superstar)
-  (add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
+(add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
+  (add-hook 'org-mode-hook 'org-superstar-mode)
         (setq org-src-tab-acts-natively t)
         (setq org-src-fontify-natively t)
         (require 'org-tempo)
         (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
         (add-hook 'org-mode-hook (lambda() (display-line-numbers-mode 0)))
-        (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
         (add-hook 'org-mode-hook 'org-indent-mode)
         (add-hook 'org-mode-hook 'visual-line-mode)
         (add-hook 'org-mode-hook (lambda () (set-fringe-mode 10)))
@@ -235,9 +239,10 @@
       (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
       (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
 
+(add-hook 'org-agenda-mode-hook (lambda () (display-line-numbers-mode 0) ))
   (setq org-directory "~/Dropbox/notes"
         org-agenda-files '("~/Dropbox/notes" "~/Dropbox/notes/daily"))
-(setq org-id-locations-file (expand-file-name ".orgids" org-directory)
+(setq org-id-locations-file (expand-file-name ".orgids" org-directory))
 (setq org-insert-heading-respect-content t)
   (setq org-agenda-window-setup 'only-window)
   (use-package org-fancy-priorities)
@@ -281,7 +286,7 @@
       (use-package denote)
       (setq denote-directory "~/Dropbox/notes")
   
-      (setq denote-templates '((daily . "* Journal\n\n* Tasks\n** TODO [/]\n1. [ ] Mindfulness(10min)\n2. [ ] Journaling(5min)\n3. [ ] Check Out\n** Notes") (math-landing-page . "* meta-analysis\n* Source")))
+      (setq denote-templates '((daily . "* Journal\n\n* Tasks\n\n* Notes") (math-landing-page . "* meta-analysis\n* Source")))
 
       (defun daily-journal ()
         "Create an entry tagged 'journal' with the date as its title."
@@ -293,6 +298,7 @@
          (concat denote-directory "/daily")
          nil
          'daily)) ; multiple keywords are a list of strings: '("one" "two")
+(add-hook 'dired-mode-hook #'denote-dired-mode)
 
   (use-package citar
     :custom
@@ -303,7 +309,7 @@
     :config
     (citar-denote-mode)
     (setq citar-open-always-create-notes t))
-  (setq citar-library-paths '("~/library/papers/" "~/Dropbox/shared-notes/bookshelf/papers"))
+  (setq citar-library-paths '("~/Dropbox/library/" "~/Dropbox/shared-notes/bookshelf/papers"))
   (setq citar-templates
         '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
           (suffix . "          ${=key= id:15}    ${=type=:12}    ${tags keywords:*}")
@@ -364,36 +370,42 @@
     ("texttrademark"))
    (1
     ("part" "chapter" "section" "subsection" "subsubsection" "paragraph" "subparagraph" "part*" "chapter*" "section*" "subsection*" "subsubsection*" "paragraph*" "subparagraph*" "emph" "textit" "textsl" "textmd" "textrm" "textsf" "texttt" "textbf" "mathbf" "textsc" "textup")))))
+(general-define-key
+:keymaps 'LaTeX-mode-map
+"<tab>" 'outline-toggle-children
+"<backtab>" 'outline-show-all)
 
-(add-hook 'LaTeX-mode-hook 'electric-pair-mode)
-(use-package yasnippet)
-(setq yas-snippet-dirs '("~/.emacs.d/snippets"))
-(use-package yasnippet-snippets)
-(use-package aas
-  :hook (LaTeX-mode . aas-activate-for-major-mode))
-(yas-global-mode 1)
-(use-package laas
-  :hook ((LaTeX-mode . laas-mode))
-  :config ; do whatever here
-  (aas-set-snippets 'laas-mode
-      "mk" (lambda () (interactive)
-                  (yas-expand-snippet "$$0$"))
-      "\\[" (lambda () (interactive)
-                  (yas-expand-snippet "\\[$0\\]"))
-    ;; set condition!
-    :cond #'texmathp ; expand only while in math
-    "spn" (lambda () (interactive)
-             (yas-expand-snippet "\\Span($1)$0"))
-    "in" (lambda () (interactive)
-             (yas-expand-snippet "\\in"))
-    "sum" (lambda () (interactive)
-             (yas-expand-snippet "\\sum_{$1}^{$2}$0"))
-    "||" (lambda () (interactive)
-             (yas-expand-snippet "||$1||$0"))
-    ;; add accent snippets
-    :cond #'laas-object-on-left-condition
-    "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
+(add-hook 'LaTeX-mode-hook 'outline-minor-mode)
+    (add-hook 'LaTeX-mode-hook 'electric-pair-mode)
+    (use-package yasnippet)
+    (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+    (use-package yasnippet-snippets)
+    (use-package aas
+      :hook (LaTeX-mode . aas-activate-for-major-mode))
+    (yas-global-mode 1)
+    (use-package laas
+      :hook ((LaTeX-mode . laas-mode))
+      :config ; do whatever here
+      (aas-set-snippets 'laas-mode
+	  "mk" (lambda () (interactive)
+		      (yas-expand-snippet "$$0$"))
+	  "\\[" (lambda () (interactive)
+		      (yas-expand-snippet "\\[$0\\]"))
+	;; set condition!
+	:cond #'texmathp ; expand only while in math
+	"spn" (lambda () (interactive)
+		 (yas-expand-snippet "\\Span($1)$0"))
+	"in" (lambda () (interactive)
+		 (yas-expand-snippet "\\in"))
+	"sum" (lambda () (interactive)
+		 (yas-expand-snippet "\\sum_{$1}^{$2}$0"))
+	"||" (lambda () (interactive)
+		 (yas-expand-snippet "||$1||$0"))
+	;; add accent snippets
+	:cond #'laas-object-on-left-condition
+	"qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
 
+(use-package powerthesaurus)
 (defun my-hide-compilation-buffer (proc)
   "Hide the compile buffer `PROC' is ignored."
   (let* ((window (get-buffer-window "*compilation*"))
@@ -422,7 +434,18 @@
     (add-hook 'org-mode-hook 'flyspell-mode)
 
 (server-start)
-  (use-package exwm)
+(use-package exwm)
+
+
+(add-hook 'exwm-update-class-hook
+      (lambda ()
+        (exwm-workspace-rename-buffer exwm-class-name)))
+
+
+(require 'exwm-randr)
+(exwm-randr-enable)
+(start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 3456x2160 --pos 0x0 --rotate normal --output DP-1 --off --output DP-2 --off --output DP-3 --off")
+
   (defun jas/bind-command (key command &rest bindings)
   "Bind KEYs to COMMANDs globally"
   (while key
@@ -442,18 +465,12 @@
          ((get-buffer buffer-name)
           (switch-to-buffer (get-buffer buffer-name)))
          (t (start-process-shell-command buffer-name nil command))))))
-
-  (setq exwm-input-prefix-keys
-        '(?\M-x))
-
-  (defun jas/exwm-update-class ()
-    (exwm-workspace-rename-buffer exwm-class-name))
-  (add-hook 'exwm-update-class-hook #'jas/exwm-update-class)
   (defun jas/run-in-background (command)
     (let ((command-parts (split-string command "[ ]+")))
       (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
 
-(setq exwm-workspace-number 5)
+(setq exwm-input-prefix-keys
+        '(?\M-x))
  (setq exwm-input-global-keys
         `(
           ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
@@ -469,7 +486,11 @@
           ([?\s-v] . evil-window-split)
           ([?\s-p] . exwm-workspace-switch)
           ([?\s-w] . evil-window-delete)
+          ([?\s-]] . (lambda () (interactive) (enlarge-window-horizontally jas/window-inc-size-hor)))
+          ([?\s-[] . (lambda () (interactive) (shrink-window-horizontally jas/window-inc-size-hor)))
 
+          ([?\s-}] . (lambda () (interactive) (enlarge-window jas/window-inc-size-vert)))
+          ([?\s-{] . (lambda () (interactive) (shrink-window jas/window-inc-size-vert)))
 
           ;; Switch workspace
           ;;          ([?\s-w] . exwm-workspace-switch)
@@ -488,8 +509,36 @@
 "<XF86AudioRaiseVolume>" "amixer set Master 10%+"
 "<XF86MonBrightnessUp>" "brightnessctl set 10%+"
 "<XF86MonBrightnessDown>" "brightnessctl set 10%-"
-"s-b" "qutebrowser")
+"s-b" "qutebrowser"
+"s-g" "gimp")
 (exwm-input-set-key (kbd "s-x") 'counsel-linux-app)
+(defun jas/setup-window-by-class ()
+  (pcase exwm-class-name
+    ("qutebrowser" (exwm-workspace-move-window 2))
+    ("Brave-browser" (exwm-workspace-move-window 2))
+    ("Inkscape" (setq-default mode-line-format nil))))
+(add-hook 'exwm-floating-setup-hook
+            (lambda ()
+              (exwm-layout-hide-mode-line)))
+(add-hook 'exwm-manage-finish-hook
+            (lambda ()
+              ;; Send the window where it belongs
+              (jas/setup-window-by-class)))
+
+(setq exwm-workspace-number 4)
+(defun jas/exwm-init-hook ()
+  (jas/run-in-background "dropbox")
+  (jas/run-in-background "nm-applet")
+  (jas/run-in-background "blueman-applet")
+  (jas/run-in-background "pasystray")
+  ;; Make workspace 1 be the one where we land at startup
+  (exwm-workspace-switch-create 1)
+ ;; Start the Polybar panel
+  (jas/start-panel)
+  )
+;; When EXWM starts up, do some extra confifuration
+(add-hook 'exwm-init-hook #'jas/exwm-init-hook)
+(exwm-enable)
 
 (defvar jas/polybar-process nil
   "Holds the process of the running Polybar instance, if any")
@@ -522,23 +571,32 @@
 ;; Update panel indicator when workspace changes
 (add-hook 'exwm-workspace-switch-hook #'jas/send-polybar-exwm-workspace)
 
-(require 'exwm-randr)
-(exwm-randr-enable)
-(start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 3456x2160 --pos 0x0 --rotate normal --output DP-1 --off --output DP-2 --off --output DP-3 --off")
-(defun jas/exwm-init-hook ()
-  (jas/run-in-background "dropbox")
-  (jas/run-in-background "nm-applet")
-  (jas/run-in-background "blueman-applet")
-  (jas/run-in-background "pasystray")
-  ;; Make workspace 1 be the one where we land at startup
-  (exwm-workspace-switch-create 1)
- ;; Start the Polybar panel
-  (jas/start-panel)
-  )
-;; When EXWM starts up, do some extra confifuration
-(add-hook 'exwm-init-hook #'jas/exwm-init-hook)
-(exwm-enable)
+(use-package bongo)
+(setq bongo-default-directory "~/Dropbox/music")
 
+(defun jas/denote-link-find-file ()
+  "Use minibuffer completion to visit linked file. This is my version that works with arbitrary file types"
+  (interactive)
+  (if-let* ((current-file (buffer-file-name))
+            (file-type (denote-filetype-heuristics current-file))
+            (regexp (denote--link-in-context-regexp file-type))
+            (files (denote-link--expand-identifiers regexp)))
+
+  (let ((file-names (mapcar #'denote-get-file-name-relative-to-denote-directory
+                            files)))
+(find-file (completing-read "Jump to file: " file-names)))
+    (user-error "No links found in the current buffer")))
+(jas/leader-def
+:states 'normal
+"ms" 'jas/denote-link-find-file
+"pm" 'exwm-layout-toggle-mode-line
+"pk" 'jas/kill-panel
+"pp" 'jas/start-panel
+)
+
+
+
+(use-package password-store)
 (use-package vterm)
   (add-hook 'vterm-mode-hook (lambda() (display-line-numbers-mode 0)))
   (add-hook 'eshell-mode-hook (lambda() (display-line-numbers-mode 0)))
