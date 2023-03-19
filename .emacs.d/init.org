@@ -68,15 +68,15 @@ Set some personal variables and eliminate weird emacs defaults
 ** openwith
 Open pdfs in zathura
 #+begin_src emacs-lisp
-;;    (use-package openwith
-;;      :config
-;;      (openwith-mode 1))
-;;    (setq openwith-associations
-;;          (list
-;;           (list (openwith-make-extension-regexp
-;;                  '("pdf"))
-;;                 "zathura"
-;;                 '(file))))
+    (use-package openwith
+      :config
+      (openwith-mode 1))
+    (setq openwith-associations
+          (list
+           (list (openwith-make-extension-regexp
+                  '("pdf"))
+                 "zathura"
+                 '(file))))
 #+end_src
 
 ** keys
@@ -289,11 +289,9 @@ A variety of necessities for searching
 (add-hook 'org-agenda-mode-hook (lambda () (display-line-numbers-mode 0) ))
   (setq org-directory "~/Dropbox/notes"
         org-agenda-files '("~/Dropbox/notes" "~/Dropbox/notes/daily"))
-(setq org-id-locations-file (expand-file-name ".orgids" org-directory))
+(setq org-id-locations-file (expand-file-name ".orgids" user-emacs-directory))
 (setq org-insert-heading-respect-content t)
   (setq org-agenda-window-setup 'only-window)
-  (use-package org-fancy-priorities)
-  (setq org-fancy-priorities-list '("⚡" "⚠" "❗"))
   (setq
    org-agenda-block-separator ?\u25AA
    org-todo-keywords
@@ -312,8 +310,8 @@ A variety of necessities for searching
     (setq org-clock-mode-line-entry nil)
     (use-package org-pomodoro
       :after org)
-  (setq org-pomodoro-length 45)
-  (setq org-pomodoro-short-break-length 25)
+  (setq org-pomodoro-length 60)
+  (setq org-pomodoro-short-break-length 30)
   (setq org-pomodoro-long-break-length 45)
       (jas/leader-def
    :states 'normal
@@ -363,14 +361,14 @@ A useful note taking plugin
 #+begin_src emacs-lisp
   (use-package citar
     :custom
-    (citar-bibliography '("~/Dropbox/shared-notes/latex/templates/refs.bib")))
+    (citar-bibliography '("~/Dropbox/shared-notes/templates/refs.bib")))
   (use-package citar-denote
     :diminish
     :after citar denote
     :config
     (citar-denote-mode)
     (setq citar-open-always-create-notes t))
-  (setq citar-library-paths '("~/Dropbox/library/" "~/Dropbox/shared-notes/bookshelf/papers"))
+  (setq citar-library-paths '("~/Dropbox/library/papers" "~/Dropbox/shared-notes/bookshelf/papers"))
   (setq citar-templates
         '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
           (suffix . "          ${=key= id:15}    ${=type=:12}    ${tags keywords:*}")
@@ -408,6 +406,7 @@ A useful note taking plugin
                     (lambda ()
                       (push '("\\mathbb{C}" . ?ℂ) prettify-symbols-alist)
                       (push '("\\mathbb{F}" . ?𝔽) prettify-symbols-alist)
+                      (push '("\\dots" . ?…) prettify-symbols-alist)
                       ))
 (setq-default LaTeX-default-offset 4)
 #+end_src
@@ -447,6 +446,7 @@ A useful note taking plugin
 
 ** snippets
 #+begin_src emacs-lisp
+(setq LaTeX-electric-left-right-brace t)
 (add-hook 'LaTeX-mode-hook 'outline-minor-mode)
     (add-hook 'LaTeX-mode-hook 'electric-pair-mode)
     (use-package yasnippet)
@@ -461,16 +461,22 @@ A useful note taking plugin
       (aas-set-snippets 'laas-mode
 	  "mk" (lambda () (interactive)
 		      (yas-expand-snippet "$$0$"))
-	  "\\[" (lambda () (interactive)
-		      (yas-expand-snippet "\\[$0\\]"))
 	;; set condition!
 	:cond #'texmathp ; expand only while in math
 	"spn" (lambda () (interactive)
 		 (yas-expand-snippet "\\Span($1)$0"))
 	"in" (lambda () (interactive)
 		 (yas-expand-snippet "\\in"))
+
+	"defin" (lambda () (interactive)
+		 (yas-expand-snippet "\\int_{$1}^{$2} $0"))
+
+	";R" (lambda () (interactive)
+		 (yas-expand-snippet "\\mathbb{R}"))
 	"sum" (lambda () (interactive)
-		 (yas-expand-snippet "\\sum_{$1}^{$2}$0"))
+		 (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+
+
 	"||" (lambda () (interactive)
 		 (yas-expand-snippet "||$1||$0"))
 	;; add accent snippets
@@ -670,6 +676,18 @@ A useful note taking plugin
 (setq bongo-default-directory "~/Dropbox/music")
 #+end_src
 
+* vterm
+#+begin_src emacs-lisp
+(use-package password-store)
+(use-package vterm)
+  (add-hook 'vterm-mode-hook (lambda() (display-line-numbers-mode 0)))
+  (add-hook 'eshell-mode-hook (lambda() (display-line-numbers-mode 0)))
+(setq delete-by-moving-to-trash t)
+(jas/leader-def
+:states 'normal
+"t" 'vterm)
+#+end_src
+
 * experimental
 ** denote 
 #+begin_src emacs-lisp
@@ -692,22 +710,5 @@ A useful note taking plugin
 "pk" 'jas/kill-panel
 "pp" 'jas/start-panel
 )
-#+end_src
-
-** pdf 
-#+begin_src emacs-lisp
-
-#+end_src
-
-* vterm
-#+begin_src emacs-lisp
-(use-package password-store)
-(use-package vterm)
-  (add-hook 'vterm-mode-hook (lambda() (display-line-numbers-mode 0)))
-  (add-hook 'eshell-mode-hook (lambda() (display-line-numbers-mode 0)))
-(setq delete-by-moving-to-trash t)
-(jas/leader-def
-:states 'normal
-"t" 'vterm)
 #+end_src
 

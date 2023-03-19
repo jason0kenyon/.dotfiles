@@ -51,15 +51,15 @@
     (setq auto-save-file-name-transforms
           `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 
-;;    (use-package openwith
-;;      :config
-;;      (openwith-mode 1))
-;;    (setq openwith-associations
-;;          (list
-;;           (list (openwith-make-extension-regexp
-;;                  '("pdf"))
-;;                 "zathura"
-;;                 '(file))))
+    (use-package openwith
+      :config
+      (openwith-mode 1))
+    (setq openwith-associations
+          (list
+           (list (openwith-make-extension-regexp
+                  '("pdf"))
+                 "zathura"
+                 '(file))))
 
     (use-package undo-tree
     :diminish)
@@ -242,11 +242,9 @@
 (add-hook 'org-agenda-mode-hook (lambda () (display-line-numbers-mode 0) ))
   (setq org-directory "~/Dropbox/notes"
         org-agenda-files '("~/Dropbox/notes" "~/Dropbox/notes/daily"))
-(setq org-id-locations-file (expand-file-name ".orgids" org-directory))
+(setq org-id-locations-file (expand-file-name ".orgids" user-emacs-directory))
 (setq org-insert-heading-respect-content t)
   (setq org-agenda-window-setup 'only-window)
-  (use-package org-fancy-priorities)
-  (setq org-fancy-priorities-list '("⚡" "⚠" "❗"))
   (setq
    org-agenda-block-separator ?\u25AA
    org-todo-keywords
@@ -262,8 +260,8 @@
     (setq org-clock-mode-line-entry nil)
     (use-package org-pomodoro
       :after org)
-  (setq org-pomodoro-length 45)
-  (setq org-pomodoro-short-break-length 25)
+  (setq org-pomodoro-length 60)
+  (setq org-pomodoro-short-break-length 30)
   (setq org-pomodoro-long-break-length 45)
       (jas/leader-def
    :states 'normal
@@ -302,14 +300,14 @@
 
   (use-package citar
     :custom
-    (citar-bibliography '("~/Dropbox/shared-notes/latex/templates/refs.bib")))
+    (citar-bibliography '("~/Dropbox/shared-notes/templates/refs.bib")))
   (use-package citar-denote
     :diminish
     :after citar denote
     :config
     (citar-denote-mode)
     (setq citar-open-always-create-notes t))
-  (setq citar-library-paths '("~/Dropbox/library/" "~/Dropbox/shared-notes/bookshelf/papers"))
+  (setq citar-library-paths '("~/Dropbox/library/papers" "~/Dropbox/shared-notes/bookshelf/papers"))
   (setq citar-templates
         '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
           (suffix . "          ${=key= id:15}    ${=type=:12}    ${tags keywords:*}")
@@ -343,6 +341,7 @@
                     (lambda ()
                       (push '("\\mathbb{C}" . ?ℂ) prettify-symbols-alist)
                       (push '("\\mathbb{F}" . ?𝔽) prettify-symbols-alist)
+                      (push '("\\dots" . ?…) prettify-symbols-alist)
                       ))
 (setq-default LaTeX-default-offset 4)
 
@@ -375,6 +374,7 @@
 "<tab>" 'outline-toggle-children
 "<backtab>" 'outline-show-all)
 
+(setq LaTeX-electric-left-right-brace t)
 (add-hook 'LaTeX-mode-hook 'outline-minor-mode)
     (add-hook 'LaTeX-mode-hook 'electric-pair-mode)
     (use-package yasnippet)
@@ -389,16 +389,22 @@
       (aas-set-snippets 'laas-mode
 	  "mk" (lambda () (interactive)
 		      (yas-expand-snippet "$$0$"))
-	  "\\[" (lambda () (interactive)
-		      (yas-expand-snippet "\\[$0\\]"))
 	;; set condition!
 	:cond #'texmathp ; expand only while in math
 	"spn" (lambda () (interactive)
 		 (yas-expand-snippet "\\Span($1)$0"))
 	"in" (lambda () (interactive)
 		 (yas-expand-snippet "\\in"))
+
+	"defin" (lambda () (interactive)
+		 (yas-expand-snippet "\\int_{$1}^{$2} $0"))
+
+	";R" (lambda () (interactive)
+		 (yas-expand-snippet "\\mathbb{R}"))
 	"sum" (lambda () (interactive)
-		 (yas-expand-snippet "\\sum_{$1}^{$2}$0"))
+		 (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+
+
 	"||" (lambda () (interactive)
 		 (yas-expand-snippet "||$1||$0"))
 	;; add accent snippets
@@ -574,6 +580,15 @@
 (use-package bongo)
 (setq bongo-default-directory "~/Dropbox/music")
 
+(use-package password-store)
+(use-package vterm)
+  (add-hook 'vterm-mode-hook (lambda() (display-line-numbers-mode 0)))
+  (add-hook 'eshell-mode-hook (lambda() (display-line-numbers-mode 0)))
+(setq delete-by-moving-to-trash t)
+(jas/leader-def
+:states 'normal
+"t" 'vterm)
+
 (defun jas/denote-link-find-file ()
   "Use minibuffer completion to visit linked file. This is my version that works with arbitrary file types"
   (interactive)
@@ -593,14 +608,3 @@
 "pk" 'jas/kill-panel
 "pp" 'jas/start-panel
 )
-
-
-
-(use-package password-store)
-(use-package vterm)
-  (add-hook 'vterm-mode-hook (lambda() (display-line-numbers-mode 0)))
-  (add-hook 'eshell-mode-hook (lambda() (display-line-numbers-mode 0)))
-(setq delete-by-moving-to-trash t)
-(jas/leader-def
-:states 'normal
-"t" 'vterm)
