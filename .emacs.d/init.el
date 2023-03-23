@@ -146,6 +146,7 @@
   (use-package kaolin-themes)
   (load-theme 'doom-city-lights t)
 
+(use-package sudo-edit)
         (use-package doom-modeline)
 (setq doom-modeline-height 60)
   ;; Define your custom doom-modeline
@@ -319,12 +320,18 @@
           (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . "🔗")))
   (setq citar-symbol-separator "  ")
 
+(use-package cdlatex)
+(require 'lazytab)
+(set-display-table-slot standard-display-table 
+                         'selective-display 
+                         (string-to-vector " ▼"))
   (use-package mixed-pitch)
   (add-hook 'LaTeX-mode-hook 'mixed-pitch-mode)
         (general-define-key
     :keymaps 'LaTeX-mode-map
-  "C-<return>" 'LaTeX-insert-item
+  "C-<return>" (lambda () (interactive) (LaTeX-insert-item) (TeX-fold-paragraph))
       )
+(add-hook 'yas-after-exit-snippet-hook 'TeX-fold-buffer)
     (setq TeX-electric-sub-and-superscript t)
           (setq TeX-parse-self t)
           (setq-default TeX-master nil)
@@ -335,7 +342,10 @@
           (add-hook 'TeX-mode-hook 'visual-line-mode)
           (add-hook 'TeX-mode-hook 'reftex-mode)
           (add-hook 'org-mode-hook 'org-toggle-pretty-entities)
-          (add-hook 'TeX-mode-hook (lambda () (TeX-fold-mode 1) (TeX-fold-buffer)))
+(add-hook 'LaTeX-mode-hook 
+          (lambda ()
+            (TeX-fold-mode 1)
+            (add-hook 'find-file-hook 'TeX-fold-buffer t t)))
           (add-hook 'TeX-mode-hook 'prettify-symbols-mode)
           (add-hook 'TeX-mode-hook
                     (lambda ()
@@ -343,7 +353,8 @@
                       (push '("\\mathbb{F}" . ?𝔽) prettify-symbols-alist)
                       (push '("\\dots" . ?…) prettify-symbols-alist)
                       ))
-(setq-default LaTeX-default-offset 4)
+(setq LaTeX-item-indent 2)
+(setq LaTeX-indent-level 4)
 
 (custom-set-variables
  '(TeX-fold-macro-spec-list
@@ -357,22 +368,23 @@
     ("ref" "pageref" "eqref" "footref"))
    ("[i]"
     ("index" "glossary"))
-   ("[1]:||*"
+   ("[1]:||🟍"
     ("item"))
    ("..."
     ("dots"))
-   ("(C)"
-    ("copyright"))
-   ("(R)"
-    ("textregistered"))
-   ("TM"
-    ("texttrademark"))
+;; tweaked defaults
+        ("©" ("copyright"))
+        ("®" ("textregistered"))
+        ("™"  ("texttrademark"))
+        ;; extra
+        ("⬖{1}" ("begin"))
+        ("⬗{1}" ("end"))
    (1
     ("part" "chapter" "section" "subsection" "subsubsection" "paragraph" "subparagraph" "part*" "chapter*" "section*" "subsection*" "subsubsection*" "paragraph*" "subparagraph*" "emph" "textit" "textsl" "textmd" "textrm" "textsf" "texttt" "textbf" "mathbf" "textsc" "textup")))))
 (general-define-key
+:states 'normal
 :keymaps 'LaTeX-mode-map
-"<tab>" 'outline-toggle-children
-"<backtab>" 'outline-show-all)
+"<tab>" 'outline-toggle-children)
 
 (setq LaTeX-electric-left-right-brace t)
 (add-hook 'LaTeX-mode-hook 'outline-minor-mode)
@@ -383,6 +395,8 @@
     (use-package aas
       :hook (LaTeX-mode . aas-activate-for-major-mode))
     (yas-global-mode 1)
+(defun jas/enum-check ()
+(string= (LaTeX-current-environment) "enumerate"))
     (use-package laas
       :hook ((LaTeX-mode . laas-mode))
       :config ; do whatever here
@@ -390,17 +404,28 @@
 	  "mk" (lambda () (interactive)
 		      (yas-expand-snippet "$$0$"))
 	;; set condition!
-	:cond #'texmathp ; expand only while in math
+	"pma" (lambda () (interactive)
+                (orgtbl-mode)
+		 (yas-expand-snippet
+"\\begin{pmatrix}
+$0
+\\end{pmatrix}"))
 	"spn" (lambda () (interactive)
 		 (yas-expand-snippet "\\Span($1)$0"))
-	"in" (lambda () (interactive)
-		 (yas-expand-snippet "\\in"))
 
 	"defin" (lambda () (interactive)
 		 (yas-expand-snippet "\\int_{$1}^{$2} $0"))
 
 	";R" (lambda () (interactive)
 		 (yas-expand-snippet "\\mathbb{R}"))
+
+	";C" (lambda () (interactive)
+		 (yas-expand-snippet "\\mathbb{C}"))
+	";<" (lambda () (interactive)
+		 (yas-expand-snippet "\\langle "))
+
+	";>" (lambda () (interactive)
+		 (yas-expand-snippet "\\rangle"))
 	"sum" (lambda () (interactive)
 		 (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
 
@@ -411,6 +436,7 @@
 	:cond #'laas-object-on-left-condition
 	"qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
 
+;;(add-hook 'aas-post-snippet-expand-hook (lambda () (TeX-fold-buffer)))
 (use-package powerthesaurus)
 (defun my-hide-compilation-buffer (proc)
   "Hide the compile buffer `PROC' is ignored."
@@ -429,6 +455,7 @@
        (add-hook 'LaTeX-mode-hook (lambda () (set-fringe-mode 30)))
        (jas/leader-def
       :states 'normal
+    "<tab>" 'lazytab-orgtbl-replace
     "sf" 'consult-flycheck
     "sg" 'consult-ripgrep
     "sw" 'dictionary-search
@@ -608,3 +635,11 @@
 "pk" 'jas/kill-panel
 "pp" 'jas/start-panel
 )
+(use-package elfeed)
+;; Somewhere in your .emacs file
+(setq elfeed-feeds
+      '("https://api.quantamagazine.org/feed/"
+("http://arxiv.org/rss/math.DS" chaos)
+("http://arxiv.org/rss/math.AG" alggeom)
+("http://arxiv.org/rss/math.DG" difgeo)
+))
